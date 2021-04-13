@@ -1,0 +1,9 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <div class="info"><i class="fas fa-question-circle"></i> {{localize "mtte.clickToClose"}}</div>
+  {{#if resize}}
+  <img src="{{thumb}}" width="400" />
+  {{/if}}
+  {{#unless resize}}
+  <div class="thumb"></div>
+  {{/unless}}
+</form>

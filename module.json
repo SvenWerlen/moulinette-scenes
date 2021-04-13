@@ -1,0 +1,32 @@
+{
+  "name": "moulinette-scenes",
+  "title": "Moulinette Forge Scenes (module)",
+  "description": "This module for Moulinette adds capabilities for downloading scenes from the community.",
+  "version": "0.1.0",
+  "author": "Sven Werlen",
+  "esmodules": ["moulinette-scenes.js"],
+  "styles": ["moulinette-scenes.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "fr",
+      "name": "French",
+      "path": "lang/fr.json"
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "moulinette-core",
+      "type": "module"
+    }
+  ],
+  "url": "https://github.com/SvenWerlen/moulinette-scenes",
+  "download": "https://github.com/SvenWerlen/moulinette-scenes/archive/v-0.1.0.zip",
+  "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-scenes/master/module.json",
+  "minimumCoreVersion": "0.7.6",
+  "compatibleCoreVersion": "0.7.9"
+}
