@@ -5,24 +5,33 @@ import { MoulinettePreview } from "./moulinette-preview.js"
  */
 export class MoulinetteScenes extends game.moulinette.applications.MoulinetteForgeModule {
 
-  async getAssetList() {
-    // load available scenes
-    let client = new game.moulinette.applications.MoulinetteClient()
-    let lists = await client.get("/bundler/fvtt/packs")
-    
-    if( !lists || lists.status != 200) {
-      return console.log(`Moulinette | Error during communication with Moulinette server`, lists);
-    }
-    
-    let scCount = 0;
-    this.lists = lists.data
-    
+  constructor() {
+    super()
+    this.scenes = []
+  }
+  
+  
+  /**
+   * Implements getAssetList
+   */
+  async getAssetList(searchTerms) {
     let assets = []
     
-    this.lists.scenes.forEach( sc => { 
+    let filteredList = await this._getAvailableScenes()
+    if(searchTerms && searchTerms.length >= 3) {
+      const filters = searchTerms.toLowerCase().split(" ")
+      filteredList = filteredList.filter( sc => {
+        for( const f of filters ) {
+          if( sc.name.toLowerCase().indexOf(f) < 0 && sc.description.toLowerCase().indexOf(f) < 0 ) return false
+        }
+        return true;
+      })
+    }
+    
+    filteredList.forEach( sc => { 
       assets.push(`
-        <div for="${sc.name}" class="pack" title="${sc.description}">
-          <span class="scene">
+        <div for="${sc.name}" class="scene" title="${sc.description}">
+          <span class="label">
             <input type="checkbox" class="check" name="${sc.id}" value="${sc.url}">
             ${sc.name} <small>(${sc.scenesCount})</small>
             <i class="preview fas fa-eye" data-id="${sc.filename}" title="${game.i18n.localize("mtte.preview")}"></i>
@@ -34,6 +43,27 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     return assets
   }
   
+  
+  /**
+   * Returns the available scenes (retrieves it from the server if not yet cached)
+   */
+  async _getAvailableScenes() {
+    if(this.scenes.length == 0) {
+      let client = new game.moulinette.applications.MoulinetteClient()
+      let lists = await client.get("/bundler/fvtt/packs")
+      
+      if( !lists || lists.status != 200) {
+        console.log(`Moulinette | Error during communication with Moulinette server`, lists);
+        return []
+      }
+      this.scenes = lists.data.scenes
+    }
+    return this.scenes
+  }
+  
+  /**
+   * Implements listeners
+   */
   activateListeners(html) {
     // click on preview
     html.find(".preview").click(this._onPreview.bind(this));
@@ -47,31 +77,40 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   }
   
   _alternateColors() {
-    $('.forge .pack').removeClass("alt");
-    $('.forge .pack:even').addClass("alt");
+    $('.forge .scene').removeClass("alt");
+    $('.forge .scene:even').addClass("alt");
   }
   
-  async onAction(event) {
-    const source = event.currentTarget;
-    const window = this
-
-    if(source.classList.contains("clear")) {
+  
+  /**
+   * Implements actions
+   * - clear: unchecks all check boxes
+   * - install: installs all selected scenes
+   */
+  async onAction(classList) {
+    if(classList.contains("clear")) {
       this.html.find(".list .check:checkbox").prop('checked', false);
     }
-    else if (source.classList.contains("install")) {
+    else if (classList.contains("install")) {
       const names = []
       this.html.find(".list .check:checkbox:checked").each(function () {
         names.push($(this).attr("name"))
       });
       
-      const selected = this.lists.scenes.filter( ts => names.includes(ts.id) )
+      const selected = (await this._getAvailableScenes()).filter( ts => names.includes(ts.id) )
       if(selected.length == 0) {
         return ui.notifications.error(game.i18n.localize("ERROR.mtteSelectAtLeastOne"));
       }
       this._installScenes(selected)
+    } 
+    else {
+      console.warn(`MoulinetteScenes | No action implemented for action '${classList}'`)
     }
   }
   
+  /**
+   * Previews selected scene
+   */
   _onPreview(event) {
     event.preventDefault();
     const source = event.currentTarget;
@@ -80,14 +119,12 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     new MoulinettePreview({ thumb: thumbURL}).render(true)
   }
   
+  
   /*************************************
    * Main action
    ************************************/
   async _installScenes(selected) {
     event.preventDefault();
-    if(!this.lists || !this.lists.scenes) {
-      return;
-    }
     
     ui.scenes.activate() // give focus to scenes
     
@@ -154,7 +191,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
             }
             
             const blob = await res.blob()
-            await game.moulinette.applications.Moulinette.upload(new File([blob], sc.name, { type: blob.type, lastModified: new Date() }), sc.name, "moulinette/scenes", `moulinette/scenes/${pack.id}`, false)
+            await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], sc.name, { type: blob.type, lastModified: new Date() }), sc.name, "moulinette/scenes", `moulinette/scenes/${pack.id}`, false)
             if(proxyImg) {
               client.delete(`/bundler/fvtt/image/${proxyImg}`)
             }

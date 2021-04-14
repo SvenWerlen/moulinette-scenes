@@ -1,16 +1,12 @@
 
 /**
- * Init: define global game settings & helpers
- */
-Hooks.once("init", async function () {
-
-});
-
-/**
  * Ready: defines a shortcut to open Moulinette Interface
  */
 Hooks.once("ready", async function () {
   if (game.user.isGM) {
+    // create default home folder for scenes
+    await game.moulinette.applications.MoulinetteFileUtil.createFolderIfMissing("moulinette", "moulinette/scenes");
+    
     const moduleClass = (await import("./modules/moulinette-scenes.js")).MoulinetteScenes
     game.moulinette.forge.push({
       id: "scenes",
