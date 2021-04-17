@@ -28,3 +28,11 @@
   background-color: #333;
   color: #eee;
 }
+
+.mtte .thumb { 
+  overflow: hidden;
+  margin: auto;
+  width: 400px;
+  height: 400px;
+}
+

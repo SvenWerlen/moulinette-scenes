@@ -1,0 +1,14 @@
+{
+  "mtte.clearAction": "Tout d\u00e9selectionner",
+  "mtte.clearActionToolTip": "D\u00e9cocher toutes les bo\u00eetes \u00e0 cocher",
+  "mtte.clickToClose": "Cliquer n'importe o\u00f9 pour fermer la pr\u00e9visualisation",
+  "mtte.forge": "Forger!",
+  "mtte.forgeToolTip": "Forger les \u00e9l\u00e9ments s\u00e9lectionn\u00e9s",
+  "mtte.forgingFailure": "Quelquechose s'est mal pass\u00e9. Rapportez le sur le Discord de Moulinette",
+  "mtte.forgingItem": "Forge {pack} ... Veuillez attendre!",
+  "mtte.forgingItemMultiple": "Forge {pack} ({scene}) ... Veuillez attendre!",
+  "mtte.forgingSuccess": "Les sc\u00e8nes ont \u00e9t\u00e9 forg\u00e9es avec succ\u00e8s!",
+  "mtte.preview": "Pr\u00e9visualiser la sc\u00e8ne.",
+  "mtte.scenes": "Sc\u00e8nes",
+  "mtte.scenesDescription": "Sc\u00e8nes disponibles pour Moulinette. Voir <a href=\"https://github.com/SvenWerlen/moulinette-data/tree/main/scenes\" target=\"_blank\">liste des sc\u00e8nes</a>."
+}

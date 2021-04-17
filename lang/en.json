@@ -1,21 +1,14 @@
 {
-  "mtte.scenes": "Scenes",
-  "mtte.scenesDescription": "Scenes currently available for Moulinette. See <a href=\"https://github.com/SvenWerlen/moulinette-data/tree/main/scenes\" target=\"_blank\">scenes list</a>.",
-  "mtte.forge": "Forge!",
-  "mtte.forgeToolTip": "Forge the selected items",
   "mtte.clearAction": "Unselect all",
   "mtte.clearActionToolTip": "Unselects all checkboxes",
-  "mtte.preview": "See preview of the scene.",
   "mtte.clickToClose": "Click anywhere to close preview window",
-  
+  "mtte.forge": "Forge!",
+  "mtte.forgeToolTip": "Forge the selected items",
+  "mtte.forgingFailure": "Something went bad. Report it to Moulinette Discord",
   "mtte.forgingItem": "Forging {pack} ... please wait!",
   "mtte.forgingItemMultiple": "Forging {pack} ({scene}) ... please wait!",
   "mtte.forgingSuccess": "Scenes were successfully forged!",
-  "mtte.forgingFailure": "Something went bad. Report it to Moulinette Discord",
-  
-  "ERROR.mtteSelectAtLeastOne": "Please check at least one element!",
-  "ERROR.mtteTooMany": "You selected too many elements at once. Maximum 3.",
-  "ERROR.mtteInProgress": "Forge is already active. Please wait!",
-  
-  "mtte.END": ""
+  "mtte.preview": "See preview of the scene.",
+  "mtte.scenes": "Scenes",
+  "mtte.scenesDescription": "Scenes currently available for Moulinette. See <a href=\"https://github.com/SvenWerlen/moulinette-data/tree/main/scenes\" target=\"_blank\">scenes list</a>."
 }
