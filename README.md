@@ -1,7 +1,7 @@
 # Moulinette Forge Scenes (Foundry VTT)
 
-[![GitHub tags (latest by date)](https://img.shields.io/github/v/tag/SvenWerlen/moulinette-scenes)](https://github.com/SvenWerlen/fvtt-moulinette/releases)
-[![License](https://img.shields.io/github/license/SvenWerlen/moulinette-scenes)](https://github.com/SvenWerlen/fvtt-moulinette/LICENSE.txt)
+[![GitHub tags (latest by date)](https://img.shields.io/github/v/tag/SvenWerlen/moulinette-scenes)](https://github.com/SvenWerlen/moulinette-scenes/releases)
+[![License](https://img.shields.io/github/license/SvenWerlen/moulinette-scenes)](https://github.com/SvenWerlen/moulinette-scenes/LICENSE.txt)
 [![GitHub Download](https://img.shields.io/badge/foundryvtt-Download-important)](#install)
 ![Tested on forge-vtt.com](https://img.shields.io/badge/Forge-supported-success)
 [![Support me on Patreon](https://img.shields.io/badge/patreon-Support%20me-informational)](https://www.patreon.com/moulinette)
