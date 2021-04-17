@@ -97,7 +97,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       
       const selected = (await this._getAvailableScenes()).filter( ts => names.includes(ts.id) )
       if(selected.length == 0) {
-        return ui.notifications.error(game.i18n.localize("ERROR.mtteSelectAtLeastOne"));
+        return ui.notifications.error(game.i18n.localize("mtte.errorSelectAtLeastOne"));
       }
       this._installScenes(selected)
     } 
@@ -127,11 +127,11 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     ui.scenes.activate() // give focus to scenes
     
     if(selected.length == 0) {
-      ui.notifications.error(game.i18n.localize("ERROR.mtteSelectAtLeastOne"))
+      ui.notifications.error(game.i18n.localize("mtte.errorSelectAtLeastOne"))
     } else if (selected.length > 3) {
-      ui.notifications.error(game.i18n.localize("ERROR.mtteTooMany"))
+      ui.notifications.error(game.i18n.localize("mtte.errorTooMany"))
     } else if (this.inProgress) {
-      ui.notifications.info(game.i18n.localize("ERROR.mtteInProgress"));
+      ui.notifications.info(game.i18n.localize("mtte.errorInProgress"));
     } else {
       this.inProgress = true
       let client = new game.moulinette.applications.MoulinetteClient()

@@ -1,0 +1,58 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <p>{{localize "mtte.shareWelcome"}}</p>
+  {{#if error}}
+  <div class="error">{{error}}</div>
+  {{/if}}
+  <div class="form-group">
+    <label><b>{{localize "mtte.sceneName"}}</b></label>
+    <label><input class="sceneName" type="text" name="sceneName" value="{{sceneName}}" maxLength="50" /></label>
+  </div>
+  <div class="form-group">
+    <label><b>{{localize "mtte.sceneDesc"}}</b> <i class="fas fa-question-circle" title="{{localize "mtte.sceneDescToolTip"}}"></i></label>
+    <label><input class="sceneDesc" type="text" name="sceneDesc" value="{{sceneDesc}}" maxLength="50" /></label>
+  </div>
+  <div class="form-group">
+    <label><b>{{localize "mtte.authorImg"}}</b> <i class="fas fa-question-circle" title="{{localize "mtte.authorImgToolTip"}}"></i></label></label>
+    <label><input class="authorImg" type="text" name="authorImg" value="{{authorImg}}" maxLength="50" /></label>
+  </div>
+  <div class="form-group">
+    <label><b>{{localize "mtte.authorURL"}}</b> <i class="fas fa-question-circle" title="{{localize "mtte.authorURLToolTip"}}"></i></label></label>
+    <label><input class="authorURL" type="text" name="authorURL" value="{{authorURL}}" maxLength="100" /></label>
+  </div>
+  <div class="form-group">
+    <label><b>{{localize "mtte.imageURL"}}</b> <i class="fas fa-question-circle" title="{{localize "mtte.imageURLToolTip"}}"></i></label></label>
+    <label><input class="imageURL" type="text" name="imageURL" value="{{imageURL}}" maxLength="100" /></label>
+  </div>
+  <div class="form-group">
+    <label><b>{{localize "mtte.discordId"}}</b> <i class="fas fa-question-circle" title="{{localize "mtte.discordIdToolTip"}}"></i></label></label>
+    <label><input class="discordId" type="text" name="discordId"  value="{{discordId}}" maxLength="50" /></label>
+  </div>
+  <div class="form-group">
+    <label class="agree"><input class="agree1" type="checkbox" name="agree1" value="1" /> {{localize "mtte.shareAgree1"}} <a href="https://github.com/SvenWerlen/moulinette-data/issues/new" target="_blank">GitHub</a>. {{localize "mtte.shareAgree2"}}</label>
+  </div>
+  <div class="form-group">
+    <label class="agree"><input class="agree2" type="checkbox" name="agree2" value="1" /> {{localize "mtte.shareAgree3"}}</label>
+  </div>
+  <hr>
+  <h3>{{localize "mtte.sharePreview"}}</h3>
+  <div id="scenePacks" class="list">
+    <div class="scene" title="{{sceneDesc}}">
+      <span class="label">
+        <input type="checkbox" class="check" name="" value="">
+         <span class="sceneName">{{sceneName}}</span> <small>(1)</small>
+        <i class="preview fas fa-eye" data-id="" title="{{localize "mtte.preview"}}"></i>
+      </span>
+      <a href="{{authorURL}}" class="authorImg" target="_blank">{{authorImg}}</a>
+    </div>
+  </div>
+  <hr>
+  <footer>
+    <div class="actions">
+      <button type="submit" value="{{localize "mtte.shareButton"}}">{{localize "mtte.shareButton"}}</button>
+    </div>
+  </footer>
+  <p><em>
+    <a href="https://github.com/SvenWerlen/moulinette">{{localize "mtte.seeDoc"}}</a> {{localize "mtte.learnMore"}}
+  </em></p>
+  
+</form>
