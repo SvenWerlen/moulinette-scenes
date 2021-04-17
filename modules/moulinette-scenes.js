@@ -68,8 +68,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // click on preview
     html.find(".preview").click(this._onPreview.bind(this));
     
-    // keep messagebox reference for _updateObject
-    this.msgbox = html.find(".messagebox")
     this.html = html
     
     // enable alt _alternateColors
