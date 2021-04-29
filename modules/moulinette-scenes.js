@@ -189,14 +189,14 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
             }
             
             const blob = await res.blob()
-            await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], sc.name, { type: blob.type, lastModified: new Date() }), sc.name, "moulinette/scenes", `moulinette/scenes/${pack.id}`, false)
+            const result = await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], sc.name, { type: blob.type, lastModified: new Date() }), sc.name, "moulinette/scenes", `moulinette/scenes/${pack.id}`, false)
             if(proxyImg) {
               client.delete(`/bundler/fvtt/image/${proxyImg}`)
             }
             
             // adapt scene and create
             if(pack.list.length == 1) scene.name = pack.name
-            scene.img = `moulinette/scenes/${pack.id}/${sc.name}`
+            scene.img = result.path
             scene.tiles = []
             scene.sounds = []
             let newScene = await Scene.create(scene);
