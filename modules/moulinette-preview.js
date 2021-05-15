@@ -57,7 +57,12 @@ export class MoulinettePreview extends FormApplication {
       
       const filename = this.asset.baseURL.split("/").pop() + ".webp"
       const blob = await res.blob()
-      const result = await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], filename, { type: blob.type, lastModified: new Date() }), filename, "moulinette/scenes", `moulinette/scenes/${this.pack.name}`, false)
+      
+      // create publisher folder
+      const publisherPath = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(this.pack.publisher)
+      await game.moulinette.applications.MoulinetteFileUtil.createFolderIfMissing("moulinette/scenes", `moulinette/scenes/${publisherPath}`);
+      const packPath = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(this.pack.name)
+      const result = await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], filename, { type: blob.type, lastModified: new Date() }), filename, `moulinette/scenes/${publisherPath}`, `moulinette/scenes/${publisherPath}/${packPath}`, false)
       
       // adapt scene and create
       scene.img = result.path
@@ -68,6 +73,7 @@ export class MoulinettePreview extends FormApplication {
       await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
       
       ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
+      this.close()
     } catch(e) {
       console.log(`Moulinette | Unhandled exception`, e)
       ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')

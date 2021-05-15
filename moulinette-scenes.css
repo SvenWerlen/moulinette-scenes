@@ -42,6 +42,7 @@
   display: inline-block;
   width: 36px;
   height: 36px;
+  line-height: 36px;
   box-sizing: content-box;
   font-size: 24px;
   background: rgba(0, 0, 0, 0.5);
