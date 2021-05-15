@@ -23,10 +23,7 @@ Hooks.once("ready", async function () {
       name: game.i18n.localize("mtte.scenes"),
       description: game.i18n.localize("mtte.scenesDescription"),
       instance: new moduleClass(),
-      actions: [
-        {id: "clear", icon: "far fa-square" ,name: game.i18n.localize("mtte.clearAction"), help: game.i18n.localize("mtte.clearActionToolTip") },
-        {id: "install", icon: "fas fa-hammer" ,name: game.i18n.localize("mtte.forge"), help: game.i18n.localize("mtte.forgeToolTip") }
-      ]
+      actions: []
     })
     
     console.log("Moulinette Scenes | Module loaded")

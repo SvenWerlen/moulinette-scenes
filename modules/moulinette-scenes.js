@@ -12,73 +12,105 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   
   
   /**
-   * Implements getAssetList
+   * Returns the list of available packs
    */
-  async getAssetList(searchTerms) {
-    let assets = []
+  async getPackList() {
+    const user = await game.moulinette.applications.Moulinette.getUser()
+    const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id])
     
-    let filteredList = await this._getAvailableScenes()
-    if(searchTerms && searchTerms.length >= 3) {
-      const filters = searchTerms.toLowerCase().split(" ")
-      filteredList = filteredList.filter( sc => {
-        for( const f of filters ) {
-          if( sc.name.toLowerCase().indexOf(f) < 0 && sc.description.toLowerCase().indexOf(f) < 0 ) return false
-        }
-        return true;
-      })
-    }
-    
-    filteredList.forEach( sc => { 
-      assets.push(`
-        <div for="${sc.name}" class="scene" title="${sc.description}">
-          <span class="label">
-            <input type="checkbox" class="check" name="${sc.id}" value="${sc.url}">
-            ${sc.name} <small>(${sc.scenesCount})</small>
-            <i class="preview fas fa-eye" data-id="${sc.filename}" title="${game.i18n.localize("mtte.preview")}"></i>
-          </span>
-          <a href="${sc.source.split('|')[1]}" target="_blank">${sc.source.split('|')[0]}</a>
-        </div>`)
+    // remove non-scene
+    this.assets = index.assets.filter(a => {
+      if(!a.data || a.data["type"] !== "scene") {
+        index.packs[a.pack].count-- // decrease count in pack
+        return false;
+      }
+      return true;
     })
+    this.assetsPacks = index.packs
+    
+    // sort assets
+    this.assets.sort((a, b) => (a.data.name > b.data.name) ? 1 : -1)
+    
+    return duplicate(this.assetsPacks)
+  }
   
-    return assets
+  /**
+   * Generate a new asset (HTML) for the given result and idx
+   */
+  generateAsset(r, idx) {
+    const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    // sas (Shared access signature) for accessing remote files (Azure)
+    r.sas = this.assetsPacks[r.pack].isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    // thumb is always same as image path but with _thumb appended
+    const basePath = r.filename.substring(0, r.filename.lastIndexOf('.'))
+    r.baseURL = `${URL}${this.assetsPacks[r.pack].path}/${basePath}`
+    let html = `<div class="scene" title="${r.data.name}" data-idx="${r.idx}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
+    if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
+    if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
+    return html + "</div></div>"
   }
   
   
   /**
-   * Returns the available scenes (retrieves it from the server if not yet cached)
+   * Implements getAssetList
    */
-  async _getAvailableScenes() {
-    if(this.scenes.length == 0) {
-      let client = new game.moulinette.applications.MoulinetteClient()
-      let lists = await client.get("/bundler/fvtt/packs")
-      
-      if( !lists || lists.status != 200) {
-        console.log(`Moulinette | Error during communication with Moulinette server`, lists);
-        return []
-      }
-      this.scenes = lists.data.scenes
+  async getAssetList(searchTerms, pack) {
+    let assets = []
+    this.pack = pack
+    
+    // pack must be selected or terms provided
+    if((!pack || pack < 0) && (!searchTerms || searchTerms.length == 0)) {
+      return []
     }
-    return this.scenes
+    
+    searchTerms = searchTerms.split(" ")
+    // filter list according to search terms and selected pack
+    this.searchResults = this.assets.filter( t => {
+      // pack doesn't match selection
+      if( pack >= 0 && t.pack != pack ) return false
+      // check if text match
+      for( const f of searchTerms ) {
+        if( t.filename.toLowerCase().indexOf(f) < 0 ) return false
+      }
+      return true;
+    })
+    
+    const viewMode = game.settings.get("moulinette", "displayMode")
+    
+    // view #1 (all mixed)
+    if(viewMode == "tiles") {
+      let idx = 0
+      for(const r of this.searchResults) {
+        idx++
+        assets.push(this.generateAsset(r, idx))
+      }
+    }
+    // view #2 (by folder)
+    else {
+      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
+      const keys = Object.keys(folders).sort()
+      for(const k of keys) {
+        assets.push(`<div class="folder"><h2>${k}</h2></div>`)
+        for(const a of folders[k]) {
+          assets.push(this.generateAsset(a, a.idx))
+        }
+      }
+    }
+  
+    return assets
   }
+
   
   /**
    * Implements listeners
    */
   activateListeners(html) {
     // click on preview
-    html.find(".preview").click(this._onPreview.bind(this));
+    html.find(".scene").click(this._onPreview.bind(this));
     
     this.html = html
-    
-    // enable alt _alternateColors
-    this._alternateColors()
   }
-  
-  _alternateColors() {
-    $('.forge .scene').removeClass("alt");
-    $('.forge .scene:even').addClass("alt");
-  }
-  
   
   /**
    * Implements actions
@@ -112,107 +144,11 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   _onPreview(event) {
     event.preventDefault();
     const source = event.currentTarget;
-    const sceneId = source.dataset.id;
-    const thumbURL = `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/thumbs/${sceneId}.webp`
-    new MoulinettePreview({ thumb: thumbURL}).render(true)
-  }
-  
-  
-  /*************************************
-   * Main action
-   ************************************/
-  async _installScenes(selected) {
-    event.preventDefault();
+    const idx = source.dataset.idx;
     
-    ui.scenes.activate() // give focus to scenes
-    
-    if(selected.length == 0) {
-      ui.notifications.error(game.i18n.localize("mtte.errorSelectAtLeastOne"))
-    } else if (selected.length > 3) {
-      ui.notifications.error(game.i18n.localize("mtte.errorTooMany"))
-    } else if (this.inProgress) {
-      ui.notifications.info(game.i18n.localize("mtte.errorInProgress"));
-    } else {
-      this.inProgress = true
-      let client = new game.moulinette.applications.MoulinetteClient()
-      
-      try {
-        // iterate on each desired request
-        for( const r of selected ) {
-          const response = await fetch(`${game.moulinette.applications.MoulinetteClient.GITHUB_SRC}/main/${r.url}`).catch(function(e) {
-            console.log(`Moulinette | Not able to fetch JSON for pack ${r.name}`, e)
-          });
-          if(!response) continue;
-          const pack = await response.json()
-          
-          // retrieve all scenes from pack
-          for( const sc of pack.list ) {
-            
-            // retrieve scene JSON
-            const response = await fetch(`${game.moulinette.applications.MoulinetteClient.GITHUB_SRC}/${sc.data}`).catch(function(e) {
-              console.log(`Moulinette | Not able to fetch scene of pack ${pack.name}`, e)
-            });
-            if(!response) continue;
-            const scene = await response.json()
-            
-            // retrieve and upload scene image
-            let proxyImg = null
-            let res = null
-            
-            // change message to show progress (specially for image download/upload)
-            if(pack.list.length == 1) {
-              ui.notifications.info(game.i18n.format("mtte.forgingItem", { pack: pack.name}), 'success')
-            } else {
-              ui.notifications.info(game.i18n.format("mtte.forgingItemMultiple", { pack: pack.name, scene: scene.name}), 'success')
-            }
-              
-            if(!sc.convert) { // no conversion required => try direct download
-              try {
-                res = await fetch(sc.url, {})
-              } catch(e) {}
-            }
-            
-            if(!res) {
-              console.log("Moulinette | Direct download not working. Using proxy...")
-              const proxy = await client.get(`/bundler/fvtt/image/${pack.id}/${sc.name}`)
-              if(!proxy || proxy.status != 200) {
-                console.log("Moulinette | Proxy download not working. Skip.")
-                continue;
-              }
-              res = await fetch(proxy.data.url, {})
-              proxyImg = proxy.data.guid
-              
-              // replace filename using new extension
-              const oldExt = sc.name.split('.').pop(); 
-              const newExt = proxy.data.url.split('.').pop(); 
-              sc.name = sc.name.substring(0, sc.name.length - oldExt.length) + newExt
-            }
-            
-            const blob = await res.blob()
-            const result = await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], sc.name, { type: blob.type, lastModified: new Date() }), sc.name, "moulinette/scenes", `moulinette/scenes/${pack.id}`, false)
-            if(proxyImg) {
-              client.delete(`/bundler/fvtt/image/${proxyImg}`)
-            }
-            
-            // adapt scene and create
-            if(pack.list.length == 1) scene.name = pack.name
-            scene.img = result.path
-            scene.tiles = []
-            scene.sounds = []
-            let newScene = await Scene.create(scene);
-            let tData = await newScene.createThumbnail()
-            await newScene.update({thumb: tData.thumb});
-            client.put(`/bundler/fvtt/pack/${pack.id}`)
-          }
-        }
-        
-        ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
-      } catch(e) {
-        console.log(`Moulinette | Unhandled exception`, e)
-        ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
-      }
-      this.inProgress = false
-      //this.render();
+    if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
+      const result = this.searchResults[idx-1]
+      new MoulinettePreview(duplicate(result), duplicate(this.assetsPacks[result.pack])).render(true)
     }
   }
   

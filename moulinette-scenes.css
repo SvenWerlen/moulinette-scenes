@@ -1,32 +1,17 @@
-.mtte.share .list {
-  height: 22px;
-  overflow-y: hidden;
-  margin-top: 5px;
+.mtte.forge .scene {
+  display: inline-flex;
+  cursor: pointer;
+  position: relative;
 }
 
-.mtte .list .scene {
-  display:flex;
-  align-items:center;
-  padding-left: 3px;
-  min-height: 22px;
+.mtte.forge .scene:hover {
+  opacity: 50%;
 }
 
-.mtte .list .scene.alt {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.mtte .scene .label { 
-  width: 550px;
-}
-
-.mtte .list .scene:hover {
-  background-color: #666;
-  color: #eee;
-}
-
-.mtte .list .scene.header {
-  background-color: #333;
-  color: #eee;
+.mtte.forge .scene img {
+  object-fit: contain;
+  border: none;
+  margin: 2px;
 }
 
 .mtte .thumb { 
@@ -43,7 +28,27 @@
 }
 
 .mtte .agree {
-  line-height: 16px;
   font-size: smaller;
   text-align: justify;
 }
+
+.mtte .includes {
+  position: absolute;
+  bottom: 10px;
+}
+
+.mtte .includes .info {
+  margin-left: 10px;
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  box-sizing: content-box;
+  font-size: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px #000;
+  color: #BBB;
+  text-align: center;
+  border: 1px solid #000;
+  border-radius: 5px;
+}
+

@@ -1,9 +1,34 @@
 <form autocomplete="off" onsubmit="event.preventDefault();">
-  <div class="info"><i class="fas fa-question-circle"></i> {{localize "mtte.clickToClose"}}</div>
-  {{#if resize}}
-  <img src="{{thumb}}" width="400" />
+  <h3>{{pretty asset.data.name}}</h3>
+  <div class="scene">
+    <img width="400" height="400" src="{{asset.baseURL}}.webp{{asset.sas}}" />
+  </div>
+  <p>  
+    <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>.</i>
+  </p>
+  {{#if pack.pubWebsite}}
+  <p>  
+    {{localize "mtte.imageFrom"}} <a href="{{pack.pubWebsite}}" target="_blank">{{pack.publisher}}</a> (<a href="{{pack.url}}" target="_blank">{{pack.name}}</a>)
+  </p>
   {{/if}}
-  {{#unless resize}}
-  <div class="thumb"></div>
+  {{#unless pack.pubWebsite}}
+  <p>  
+    {{localize "mtte.imageFrom"}} {{pack.publisher}} ({{pack.name}})
+  </p>
   {{/unless}}
+  {{#if pack.licenseUrl}}
+  <p>  
+    {{localize "mtte.license"}} <a href="{{pack.licenseUrl}}" target="_blank">{{pack.license}}</a>
+  </p>
+  {{/if}}
+  {{#unless pack.pubWebsite}}
+  <p>  
+    {{localize "mtte.license"}} {{localize "mtte.unknownLicense"}}
+  </p>
+  {{/unless}}
+  <footer>
+    <div class="actions">
+      <button class="importScene" title="{{localize "mtte.importSceneToolTip"}}"><i class="fas fa-map"></i> {{localize "mtte.importScene"}}</button>
+    </div>
+  </footer>
 </form>
