@@ -39,12 +39,13 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
    * Generate a new asset (HTML) for the given result and idx
    */
   generateAsset(r, idx) {
-    const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const pack = this.assetsPacks[r.pack]
+    const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     // sas (Shared access signature) for accessing remote files (Azure)
-    r.sas = this.assetsPacks[r.pack].isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
     // thumb is always same as image path but with _thumb appended
     const basePath = r.filename.substring(0, r.filename.lastIndexOf('.'))
-    r.baseURL = `${URL}${this.assetsPacks[r.pack].path}/${basePath}`
+    r.baseURL = `${URL}${pack.path}/${basePath}`
     let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
