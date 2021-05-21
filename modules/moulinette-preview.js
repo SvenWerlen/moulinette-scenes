@@ -42,32 +42,24 @@ export class MoulinettePreview extends FormApplication {
     ui.scenes.activate() // give focus to scenes
     try {
       // retrieve scene JSON
-      const response = await fetch(`${this.asset.baseURL}.json`).catch(function(e) {
+      const response = await fetch(`${this.pack.path}/${this.asset.filename}${this.asset.sas}`).catch(function(e) {
         console.log(`Moulinette | Not able to fetch scene JSON`, e)
       });
       if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
-      const scene = await response.json()
       
-      // retrieve and upload scene image
-      let proxyImg = null
-      let res = await fetch(`${this.asset.baseURL}.webp`).catch(function(e) {
-        console.log(`Moulinette | Not able to fetch scene image`, e)
-      });
-      if(!res) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
-      
-      const filename = this.asset.baseURL.split("/").pop() + ".webp"
-      const blob = await res.blob()
-      
-      // create publisher folder
+      // prepare source & target URL
       const publisherPath = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(this.pack.publisher)
-      await game.moulinette.applications.MoulinetteFileUtil.createFolderIfMissing("moulinette/scenes", `moulinette/scenes/${publisherPath}`);
       const packPath = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(this.pack.name)
-      const result = await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], filename, { type: blob.type, lastModified: new Date() }), filename, `moulinette/scenes/${publisherPath}`, `moulinette/scenes/${publisherPath}/${packPath}`, false)
+      const targetPath = `moulinette/scenes/${publisherPath}/${packPath}/`
+      
+      // download all dependencies
+      await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset.data.deps, this.pack.path + "/", this.asset.sas, targetPath)
+      
+      // replace all DEPS
+      const jsonAsText = await response.text()
+      const scene = JSON.parse( jsonAsText.replace(new RegExp("#DEP#", "g"), targetPath) )
       
       // adapt scene and create
-      scene.img = result.path
-      scene.tiles = []
-      scene.sounds = []
       let newScene = await Scene.create(scene);
       let tData = await newScene.createThumbnail()
       await newScene.update({thumb: tData.thumb}); // force generating the thumbnail

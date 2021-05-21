@@ -44,7 +44,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // sas (Shared access signature) for accessing remote files (Azure)
     r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
     // thumb is always same as image path but with _thumb appended
-    const basePath = r.filename.substring(0, r.filename.lastIndexOf('.'))
+    const basePath = r.data.img.substring(0, r.data.img.lastIndexOf('.'))
     r.baseURL = `${URL}${pack.path}/${basePath}`
     let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
@@ -113,31 +113,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.html = html
   }
   
-  /**
-   * Implements actions
-   * - clear: unchecks all check boxes
-   * - install: installs all selected scenes
-   */
-  async onAction(classList) {
-    if(classList.contains("clear")) {
-      this.html.find(".list .check:checkbox").prop('checked', false);
-    }
-    else if (classList.contains("install")) {
-      const names = []
-      this.html.find(".list .check:checkbox:checked").each(function () {
-        names.push($(this).attr("name"))
-      });
-      
-      const selected = (await this._getAvailableScenes()).filter( ts => names.includes(ts.id) )
-      if(selected.length == 0) {
-        return ui.notifications.error(game.i18n.localize("mtte.errorSelectAtLeastOne"));
-      }
-      this._installScenes(selected)
-    } 
-    else {
-      console.warn(`MoulinetteScenes | No action implemented for action '${classList}'`)
-    }
-  }
   
   /**
    * Previews selected scene
