@@ -47,20 +47,17 @@ export class MoulinettePreview extends FormApplication {
       });
       if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
       
-      // prepare source & target URL
-      const publisherPath = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(this.pack.publisher)
-      const packPath = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(this.pack.name)
-      const targetPath = `moulinette/scenes/${publisherPath}/${packPath}/`
-      
       // download all dependencies
-      await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset.data.deps, this.pack.path + "/", this.asset.sas, targetPath)
+      const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud")
       
       // replace all DEPS
-      const jsonAsText = await response.text()
-      const scene = JSON.parse( jsonAsText.replace(new RegExp("#DEP#", "g"), targetPath) )
+      let jsonAsText = await response.text()
+      for(let i = 0; i<paths.length; i++) {
+        jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
+      }
       
       // adapt scene and create
-      let newScene = await Scene.create(scene);
+      let newScene = await Scene.create(JSON.parse(jsonAsText));
       let tData = await newScene.createThumbnail()
       await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
       
