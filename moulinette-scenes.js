@@ -14,7 +14,7 @@ Hooks.once("init", async function () {
 Hooks.once("ready", async function () {
   if (game.user.isGM) {
     // create default home folder for scenes
-    await game.moulinette.applications.MoulinetteFileUtil.createFolderIfMissing("moulinette", "moulinette/scenes");
+    await game.moulinette.applications.MoulinetteFileUtil.createFolderRecursive("moulinette/scenes");
     
     const moduleClass = (await import("./modules/moulinette-scenes.js")).MoulinetteScenes
     game.moulinette.forge.push({

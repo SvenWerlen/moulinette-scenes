@@ -49,6 +49,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
+    if(r.data.sounds) html += `<div class="info"><i class="fas fa-music"></i></div>`
+    if(r.data.drawings) html += `<div class="info"><i class="fas fa-pencil-alt"></i></div>`
     return html + "</div></div>"
   }
   
