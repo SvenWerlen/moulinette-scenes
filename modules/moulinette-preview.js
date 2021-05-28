@@ -29,7 +29,6 @@ export class MoulinettePreview extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
     this.bringToTop()
-    
     html.find("button").click(this._onClick.bind(this))
   }
   
@@ -41,19 +40,41 @@ export class MoulinettePreview extends FormApplication {
     
     ui.scenes.activate() // give focus to scenes
     try {
-      // retrieve scene JSON
-      const response = await fetch(`${this.pack.path}/${this.asset.filename}${this.asset.sas}`).catch(function(e) {
-        console.log(`Moulinette | Not able to fetch scene JSON`, e)
-      });
-      if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
+      let jsonAsText;
       
-      // download all dependencies
-      const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud")
+      // Moulinette Cloud scenes
+      if(this.asset.filename.endsWith(".json")) {
+        // retrieve scene JSON
+        const response = await fetch(`${this.pack.path}/${this.asset.filename}${this.asset.sas}`).catch(function(e) {
+          console.log(`Moulinette | Not able to fetch scene JSON`, e)
+        });
+        if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
+        
+        // download all dependencies
+        const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud")
       
-      // replace all DEPS
-      let jsonAsText = await response.text()
-      for(let i = 0; i<paths.length; i++) {
-        jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
+        // replace all DEPS
+        jsonAsText = await response.text()
+        
+        for(let i = 0; i<paths.length; i++) {
+          jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
+        }
+      }
+      // Simple images
+      else {
+        const img = document.getElementById("previewImage")
+        if(img) {
+          jsonAsText = JSON.stringify({
+            "name": game.moulinette.applications.Moulinette.prettyText(this.asset.filename.split("/").pop()),
+            "navigation": false,
+            "width": img.naturalWidth,
+            "height": img.naturalHeight,
+            "img": `${this.pack.path}/${this.asset.filename}`
+          })
+        } else {
+          console.error("Moulinette Preview | HTML Image not found")
+          return;
+        }
       }
       
       // adapt scene and create

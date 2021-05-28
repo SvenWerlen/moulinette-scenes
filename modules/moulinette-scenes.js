@@ -17,11 +17,17 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   async getPackList() {
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
-      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id])
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
+      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json"])
     
     // remove non-scene
     this.assets = index.assets.filter(a => {
-      if(!a.data || a.data["type"] !== "scene") {
+      if(a.type == "scene" && a.filename.endsWith(".webp")) {
+        // convert to scene type
+        a.data = { deps: [], eDeps: [], img: a.filename, name: a.filename }
+        return true;
+      }
+      else if(!a.data || a.data["type"] !== "scene") {
         index.packs[a.pack].count-- // decrease count in pack
         return false;
       }
@@ -41,11 +47,15 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   generateAsset(r, idx) {
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    
     // sas (Shared access signature) for accessing remote files (Azure)
     r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
-    // thumb is always same as image path but with _thumb appended
+    
+    // two types of maps. JSON files or image only
     const basePath = r.data.img.substring(0, r.data.img.lastIndexOf('.'))
     r.baseURL = `${URL}${pack.path}/${basePath}`
+    
+    // thumb is always same as image path but with _thumb appended
     let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
