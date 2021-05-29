@@ -10,11 +10,21 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.scenes = []
   }
   
+  clearCache() {
+    this.assets = null
+    this.assetsPacks = null
+    this.searchResults = null
+    this.pack = null
+  }
   
   /**
    * Returns the list of available packs
    */
   async getPackList() {
+    if(this.assetsPacks) {
+      return duplicate(this.assetsPacks)
+    }
+    
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
@@ -49,7 +59,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     
     // sas (Shared access signature) for accessing remote files (Azure)
-    r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    r.sas = pack.sas ? "?" + pack.sas : ""
     
     // two types of maps. JSON files or image only
     const basePath = r.data.img.substring(0, r.data.img.lastIndexOf('.'))
