@@ -66,7 +66,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     r.baseURL = `${URL}${pack.path}/${basePath}`
     
     // thumb is always same as image path but with _thumb appended
-    let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
+    let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
     if(r.data.sounds) html += `<div class="info"><i class="fas fa-music"></i></div>`
@@ -110,11 +110,15 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       }
     }
     // view #2 (by folder)
-    else {
+    else if(viewMode == "list" || viewMode == "browse") {
       const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
-        assets.push(`<div class="folder"><h2>${k}</h2></div>`)
+        if(viewMode == "browse") {
+          assets.push(`<div class="folder expand" data-path="${k}"><h2>${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+        } else {
+          assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
+        }
         for(const a of folders[k]) {
           assets.push(this.generateAsset(a, a.idx))
         }
