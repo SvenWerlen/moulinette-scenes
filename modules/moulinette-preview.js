@@ -57,7 +57,7 @@ export class MoulinettePreview extends FormApplication {
         jsonAsText = await response.text()
         
         for(let i = 0; i<paths.length; i++) {
-          jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i }#`, "g"), paths[i])
+          jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
         }
       }
       // Simple images
