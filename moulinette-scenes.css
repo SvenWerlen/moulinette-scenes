@@ -37,7 +37,7 @@
   bottom: 10px;
 }
 
-.mtte .includes .info {
+.mtte .includes .info, .mtte .resolutions .info {
   margin-left: 10px;
   display: inline-block;
   width: 36px;
@@ -53,3 +53,8 @@
   border-radius: 5px;
 }
 
+.mtte .resolutions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}

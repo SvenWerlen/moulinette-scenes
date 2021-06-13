@@ -42,6 +42,10 @@ export class MoulinettePreview extends FormApplication {
     try {
       let jsonAsText;
       
+      const img = document.getElementById("previewImage")
+      this.close()
+      ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
+      
       // Moulinette Cloud scenes
       if(this.asset.filename.endsWith(".json")) {
         // retrieve scene JSON
@@ -62,7 +66,6 @@ export class MoulinettePreview extends FormApplication {
       }
       // Simple images
       else {
-        const img = document.getElementById("previewImage")
         if(img) {
           jsonAsText = JSON.stringify({
             "name": game.moulinette.applications.Moulinette.prettyText(this.asset.filename.split("/").pop()),
@@ -83,7 +86,6 @@ export class MoulinettePreview extends FormApplication {
       await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
       
       ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
-      this.close()
     } catch(e) {
       console.log(`Moulinette | Unhandled exception`, e)
       ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
