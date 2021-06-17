@@ -83,12 +83,12 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   /**
    * Implements getAssetList
    */
-  async getAssetList(searchTerms, pack) {
+  async getAssetList(searchTerms, pack, publisher) {
     let assets = []
     this.pack = pack
     
     // pack must be selected or terms provided
-    if((!pack || pack < 0) && (!searchTerms || searchTerms.length == 0)) {
+    if((!pack || pack < 0) && (!publisher || publisher.length == 0) && (!searchTerms || searchTerms.length == 0)) {
       return []
     }
     
@@ -97,6 +97,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.searchResults = this.assets.filter( t => {
       // pack doesn't match selection
       if( pack >= 0 && t.pack != pack ) return false
+      // publisher doesn't match selection
+      if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
       // check if text match
       for( const f of searchTerms ) {
         if( t.filename.toLowerCase().indexOf(f) < 0 ) return false
