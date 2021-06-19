@@ -32,6 +32,35 @@ export class MoulinettePreview extends FormApplication {
     html.find("button").click(this._onClick.bind(this))
   }
   
+  /**
+   * Generates moulinette folders
+   */
+  static async getOrCreateSceneFolder(publisher, pack) {
+    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" && f.type == "Scene" )
+
+    // main
+    if( moulinetteFolder.length == 0 ) {
+      moulinetteFolder = await Folder.create({name:"Moulinette", type:"Scene", parent: null})
+    } else {
+      moulinetteFolder = moulinetteFolder[0]
+    }
+    // publisher level
+    let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
+    if( publisherFolder.length == 0 ) {
+      publisherFolder = await Folder.create({name: publisher, type: "Scene", parent: moulinetteFolder._id })
+    } else {
+      publisherFolder = publisherFolder[0]
+    }
+    // pack level
+    let packFolder = publisherFolder.children.filter( c => c.name == pack )
+    if( packFolder.length == 0 ) {
+      packFolder = await Folder.create({name: pack, type: "Scene", parent: publisherFolder._id })
+    } else {
+      packFolder = packFolder[0]
+    }
+    return packFolder
+  }
+  
   /*************************************
    * Main action
    ************************************/
@@ -81,7 +110,9 @@ export class MoulinettePreview extends FormApplication {
       }
       
       // adapt scene and create
-      let newScene = await Scene.create(JSON.parse(jsonAsText));
+      const sceneData = JSON.parse(jsonAsText)
+      sceneData.folder = await MoulinettePreview.getOrCreateSceneFolder(this.pack.publisher, this.pack.name)
+      let newScene = await Scene.create(sceneData);
       let tData = await newScene.createThumbnail()
       await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
       
