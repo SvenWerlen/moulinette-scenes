@@ -66,7 +66,9 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     r.baseURL = `${URL}${pack.path}/${basePath}`
     
     // thumb is always same as image path but with _thumb appended
-    let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/><div class="includes">`
+    const filename = r.filename.split('/').pop().replaceAll("_", " ").replaceAll("-", " ").replace(".json", "")
+    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/>`
+    html += `<div class="text">${filename}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
     if(r.data.sounds) html += `<div class="info"><i class="fas fa-music"></i></div>`
@@ -78,7 +80,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     
     return html + "</div></div>"
   }
-  
   
   /**
    * Implements getAssetList
@@ -142,6 +143,14 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   activateListeners(html) {
     // click on preview
     html.find(".scene").click(this._onPreview.bind(this));
+    html.find(".scene").mouseover(function(el) {
+      $(el.currentTarget).find("img").css("opacity", "20%")
+      $(el.currentTarget).find(".text").show()
+    });
+    html.find(".scene").mouseout(function(el) {
+      $(el.currentTarget).find("img").css("opacity", "100%")
+      $(el.currentTarget).find(".text").hide()
+    });
     
     this.html = html
   }

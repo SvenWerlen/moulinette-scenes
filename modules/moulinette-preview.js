@@ -17,19 +17,54 @@ export class MoulinettePreview extends FormApplication {
       template: "modules/moulinette-scenes/templates/preview.hbs",
       width: 420,
       height: 600,
+      dragDrop: [{dragSelector: "#previewImage"}],
       closeOnSubmit: false,
       submitOnClose: false,
     });
   }
   
   async getData() { 
-    return { asset: this.asset, pack: this.pack }
+    const filename = this.asset.filename.split('/').pop().replaceAll("_", " ").replaceAll("-", " ").replace(".json", "")
+    return { asset: this.asset, pack: this.pack, filename: filename }
   }
 
   activateListeners(html) {
     super.activateListeners(html);
     this.bringToTop()
     html.find("button").click(this._onClick.bind(this))
+  }
+  
+  _onDragStart(event) {
+    const mode = game.settings.get("moulinette", "tileMode")
+    const size = game.settings.get("moulinette", "tileSize")
+
+    const tile = duplicate(this.asset)
+    tile.filename = tile.data.img
+    delete tile.data
+    
+    let dragData = {}
+    if(mode == "tile") {
+      dragData = {
+        type: "Tile",
+        tile: tile,
+        pack: this.pack,
+        tileSize: size
+      };
+    } else if(mode == "article") {
+      dragData = {
+        type: "JournalEntry",
+        tile: tile,
+        pack: this.pack
+      };
+    } else if(mode == "actor") {
+      dragData = {
+        type: "Actor",
+        tile: tile,
+        pack: this.pack
+      };
+    }    
+    dragData.source = "mtte"
+    event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
   
   /**
@@ -111,6 +146,13 @@ export class MoulinettePreview extends FormApplication {
       
       // adapt scene and create
       const sceneData = JSON.parse(jsonAsText)
+      
+      // configure dimensions if no width/height set
+      if( !("width" in sceneData)) {
+        sceneData.width = img.naturalWidth
+        sceneData.height = img.naturalHeight
+      }
+      
       sceneData.folder = await MoulinettePreview.getOrCreateSceneFolder(this.pack.publisher, this.pack.name)
       let newScene = await Scene.create(sceneData);
       let tData = await newScene.createThumbnail()

@@ -4,10 +4,6 @@
   position: relative;
 }
 
-.mtte.forge .scene:hover {
-  opacity: 50%;
-}
-
 .mtte.forge .scene img {
   object-fit: contain;
   border: none;
@@ -57,4 +53,16 @@
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+.mtte .text {
+  text-shadow: 0.03em 0 lightgrey, 0 0.03em lightgrey;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #000;
+  font-size: large;
+  display: none;
 }

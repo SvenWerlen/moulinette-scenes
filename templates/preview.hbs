@@ -1,5 +1,5 @@
 <form autocomplete="off" onsubmit="event.preventDefault();">
-  <h3>{{pretty asset.data.name}}</h3>
+  <h3>{{pretty asset.data.name}} <small>({{filename}})</small></h3>
   <div class="scene">
     <img id="previewImage" width="400" height="400" src="{{asset.baseURL}}.webp{{asset.sas}}" />
   </div>
