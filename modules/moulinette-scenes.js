@@ -66,7 +66,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     r.baseURL = `${URL}${pack.path}/${basePath}`
     
     // thumb is always same as image path but with _thumb appended
-    const filename = r.filename.split('/').pop().replaceAll("_", " ").replaceAll("-", " ").replace(".json", "")
+    const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
     let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/>`
     html += `<div class="text">${filename}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`

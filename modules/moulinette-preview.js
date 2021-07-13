@@ -24,7 +24,7 @@ export class MoulinettePreview extends FormApplication {
   }
   
   async getData() { 
-    const filename = this.asset.filename.split('/').pop().replaceAll("_", " ").replaceAll("-", " ").replace(".json", "")
+    const filename = this.asset.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
     return { asset: this.asset, pack: this.pack, filename: filename }
   }
 
