@@ -1,1 +1,4 @@
 sync.sh
+.idea
+.git
+*.iml

@@ -21,6 +21,8 @@
   "mtte.imageURLToolTip": "Lien pour le t\u00e9l\u00e9chargement direct de l'image",
   "mtte.importScene": "Importer la sc\u00e8ne",
   "mtte.importSceneToolTip": "Importer la sc\u00e8ne dans votre monde",
+  "mtte.indexScenes": "Indexer les sc\u00e8nes",
+  "mtte.indexScenesToolTip": "Moulinette indexera les recueils de sc\u00e8nes. Vous devez r\u00e8indexer chaque fois que les Compendia changent.",
   "mtte.learnMore": "pour apprendre plus \u00e0 propos de Moulinette et/ou le supporter.",
   "mtte.license": "License",
   "mtte.preview": "Pr\u00e9visualiser la sc\u00e8ne.",
