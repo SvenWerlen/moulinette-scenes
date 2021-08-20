@@ -14,7 +14,7 @@ Hooks.once("init", async function () {
 Hooks.once("ready", async function () {
   if (game.user.isGM) {
     // create default home folder for scenes
-    await game.moulinette.applications.MoulinetteFileUtil.createFolderRecursive("moulinette/scenes");
+    await game.moulinette.applications.MoulinetteFileUtil.createFolderRecursive("moulinette/scenes/custom")
     
     const moduleClass = (await import("./modules/moulinette-scenes.js")).MoulinetteScenes
     game.moulinette.forge.push({
@@ -23,7 +23,9 @@ Hooks.once("ready", async function () {
       name: game.i18n.localize("mtte.scenes"),
       description: game.i18n.localize("mtte.scenesDescription"),
       instance: new moduleClass(),
-      actions: []
+      actions: [
+        {id: "indexScenes", icon: "fas fa-sync" ,name: game.i18n.localize("mtte.indexScenes"), help: game.i18n.localize("mtte.indexScenesToolTip") }
+      ]
     })
     
     console.log("Moulinette Scenes | Module loaded")

@@ -145,7 +145,15 @@ export class MoulinettePreview extends FormApplication {
       }
       
       // adapt scene and create
-      const sceneData = JSON.parse(jsonAsText)
+
+      // ensure compendium is loaded before accessing it
+      if(this.asset.data.journalId && game.packs.get(this.asset.filename).size === 0) {
+        await game.packs.get(this.asset.filename)?.getDocuments();
+      }
+
+      const sceneData = this.asset.data.journalId ?
+          JSON.parse(JSON.stringify(game.packs.get(this.asset.filename).get(this.asset.data.journalId).data)) :
+          JSON.parse(jsonAsText);
       
       // configure dimensions if no width/height set
       if( !("width" in sceneData)) {

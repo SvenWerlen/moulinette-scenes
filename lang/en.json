@@ -21,6 +21,8 @@
   "mtte.imageURLToolTip": "Provide a link to the image (direct link)",
   "mtte.importScene": "Import scene",
   "mtte.importSceneToolTip": "Click to import the scene into your world",
+  "mtte.indexScenes": "Index scenes",
+  "mtte.indexScenesToolTip": "Moulinette will index Scene Compendia. You must re-index every time the Compendia change.",
   "mtte.learnMore": "to learn more about Moulinette and/or support it.",
   "mtte.license": "License",
   "mtte.preview": "See preview of the scene.",
