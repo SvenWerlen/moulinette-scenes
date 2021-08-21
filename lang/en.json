@@ -22,7 +22,10 @@
   "mtte.importScene": "Import scene",
   "mtte.importSceneToolTip": "Click to import the scene into your world",
   "mtte.indexScenes": "Index scenes",
-  "mtte.indexScenesToolTip": "Moulinette will index Scene Compendia. You must re-index every time the Compendia change.",
+  "mtte.indexScenesToolTip": "Moulinette will index scenes from local compendia. You must re-index every time compendia change.",
+  "mtte.indexingDone": "Assets successfully indexed!",
+  "mtte.indexingInProgress": "Moulinette is indexing your assets... please wait",
+  "mtte.indexingMoulinette": "Moulinette indexing",
   "mtte.learnMore": "to learn more about Moulinette and/or support it.",
   "mtte.license": "License",
   "mtte.preview": "See preview of the scene.",
@@ -40,5 +43,6 @@
   "mtte.sharePreview": "Check preview below before submitting",
   "mtte.shareSuccess": "The scene successfully shared with Moulinette. Thank you for your contribution!",
   "mtte.shareWelcome": "You are about to share a scene with the Moulinette community. After the review process, the scene will be made available to everyone.",
+  "mtte.unknown": "Unknown",
   "mtte.unknownLicense": "Unknown (local)"
 }
