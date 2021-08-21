@@ -136,7 +136,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
           assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
         }
         for(const a of folders[k]) {
-          assets.push(this.generateAsset(a, a.idx))
+          assets.push(await this.generateAsset(a, a.idx))
         }
       }
     }
@@ -195,7 +195,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       return publishers;
     }
 
+    let idx = 0;
     for(const publisher of dir1.dirs) {
+      SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"), Math.round((idx / dir1.dirs.length)*100));
+      
       if(debug) console.log(`Moulinette FileUtil | Root: processing publisher ${publisher}...`)
       let dirPub = await FilePicker.browse(source, publisher, MoulinetteFileUtil.getOptions());
       let moduleJson = dirPub.files.find(f => f.endsWith('module.json'));
@@ -257,12 +260,16 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
         }
 
         publishers.push({
-          publisher: moduleJsonContent.author,
-          website: moduleJsonContent.url,
+          publisher: moduleJsonContent.author ? moduleJsonContent.author : game.i18n.localize("mtte.unknown"),
+          website: moduleJsonContent.url ? moduleJsonContent.url : null,
           packs
         })
+        
+        idx++;
       }
     }
+    SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"),100);  
+    
     return publishers
   }
 
