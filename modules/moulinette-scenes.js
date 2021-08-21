@@ -4,6 +4,8 @@ import { MoulinettePreview } from "./moulinette-preview.js"
  * Forge Module for scenes
  */
 export class MoulinetteScenes extends game.moulinette.applications.MoulinetteForgeModule {
+  static FOLDER_MODULES  = "modules";
+  static FOLDER_CUSTOM_SCENES = "moulinette/scenes/custom";
 
   constructor() {
     super()
@@ -28,8 +30,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json"])
-    
+      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/scenes/custom/index.json"])
+
     // remove non-scene
     this.assets = index.assets.filter(a => {
       if(a.type == "scene" && a.filename.endsWith(".webp")) {
@@ -47,14 +49,14 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     
     // sort assets
     this.assets.sort((a, b) => (a.data.name > b.data.name) ? 1 : -1)
-    
+
     return duplicate(this.assetsPacks)
   }
   
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  generateAsset(r, idx) {
+  async generateAsset(r, idx) {
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     
@@ -65,10 +67,16 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const basePath = r.data.img.substring(0, r.data.img.lastIndexOf('.'))
     r.baseURL = `${URL}${pack.path}/${basePath}`
     
-    // thumb is always same as image path but with _thumb appended
+    // thumb is always same as image path but with _thumb appended, except for local scenes which have thumb stored in compendium .db
     const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
-    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${r.baseURL}_thumb.webp${r.sas}"/>`
-    html += `<div class="text">${filename}</div><div class="includes">`
+    const displayName = pack.isLocal ? r.data.name : filename;
+    // ensure compendium is loaded before accessing it
+    if(pack.isLocal && game.packs.get(r.filename).size === 0) {
+       await game.packs.get(r.filename)?.getDocuments();
+    }
+    const thumbSrc = pack.isLocal ? game.packs.get(r.filename).get(r.data.journalId).data.thumb : `${r.baseURL}_thumb.webp${r.sas}`;
+    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${thumbSrc}"/>`
+    html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
     if(r.data.sounds) html += `<div class="info"><i class="fas fa-music"></i></div>`
@@ -102,7 +110,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
       // check if text match
       for( const f of searchTerms ) {
-        if( t.filename.toLowerCase().indexOf(f) < 0 ) return false
+        if( t.data.name.toLowerCase().indexOf(f) < 0 && t.filename.toLowerCase().indexOf(f) < 0 ) return false
       }
       return true;
     })
@@ -114,7 +122,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       let idx = 0
       for(const r of this.searchResults) {
         idx++
-        assets.push(this.generateAsset(r, idx))
+        assets.push(await this.generateAsset(r, idx))
       }
     }
     // view #2 (by folder)
@@ -128,7 +136,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
           assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
         }
         for(const a of folders[k]) {
-          assets.push(this.generateAsset(a, a.idx))
+          assets.push(await this.generateAsset(a, a.idx))
         }
       }
     }
@@ -169,5 +177,113 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       new MoulinettePreview(duplicate(result), duplicate(this.assetsPacks[result.pack])).render(true)
     }
   }
-  
+
+  static async scanScenes(sourcePath) {
+    const MoulinetteFileUtil = game.moulinette.applications.MoulinetteFileUtil;
+
+    const debug = game.settings.get("moulinette-core", "debugScanAssets");
+    const source = MoulinetteFileUtil.getSource();
+    // read publisher info from module.json
+    let publishers = []
+    if(debug) console.log(`Moulinette FileUtil | Root: scanning ${sourcePath} ...`)
+    let dir1 = await FilePicker.browse(source, sourcePath, MoulinetteFileUtil.getOptions());
+    if(debug) console.log(`Moulinette FileUtil | Root: ${dir1.dirs.length} subfolders found.`)
+
+    // stop scanning if ignore.info file found
+    if(dir1.files.find(f => f.endsWith("/ignore.info"))) {
+      if(debug) console.log(`Moulinette FileUtil | File ignore.info found. Stop scanning.`)
+      return publishers;
+    }
+
+    let idx = 0;
+    for(const publisher of dir1.dirs) {
+      SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"), Math.round((idx / dir1.dirs.length)*100));
+      
+      if(debug) console.log(`Moulinette FileUtil | Root: processing publisher ${publisher}...`)
+      let dirPub = await FilePicker.browse(source, publisher, MoulinetteFileUtil.getOptions());
+      let moduleJson = dirPub.files.find(f => f.endsWith('module.json'));
+      if(!moduleJson) {
+        continue;
+      }
+      const response = await fetch(moduleJson).catch(function(e) {
+        if(debug) console.log(`Moulinette | Not able to fetch module JSON`, e)
+      });
+      const moduleJsonContent = await response.json();
+      const scenePacks = moduleJsonContent?.packs?.filter(p => p.entity === 'Scene');
+      if(scenePacks?.length > 0) {
+        let packs = [];
+
+        for(let scenePack of scenePacks) {
+          const packname= `${moduleJsonContent.name}.${scenePack.name}`;
+          // get matching compendium and add it's scenes
+          const scenes = await game.packs.get(packname)?.getDocuments();
+          if(!scenes) {
+            continue;
+          }
+
+          const pack = {
+            "isLocal": true,
+            "assets":[],
+            "deps":[],
+            "license":"\u00a9 " + moduleJsonContent.author,
+            "licenseUrl":moduleJsonContent.url,
+            "name":scenePack.label,
+            "path":publisher,
+            "sas":null,
+            "showCase":true,
+            "url":moduleJsonContent.url
+          }
+
+          for(let scene of scenes) {
+            if(scene.data.img) {
+              pack.assets.push(
+                  {
+                    "deps":[
+                      scene.data.img
+                    ],
+                    "drawings":scene.data.drawings.size > 0,
+                    "eDeps":{},
+                    "img":scene.data.img,
+                    "lights":scene.data.lights.size > 0,
+                    "name":scene.data.name,
+                    "journalId":scene.id,
+                    "path":packname,
+                    "sounds":scene.data.sounds.size > 0,
+                    "type":"scene",
+                    "walls":scene.data.walls.size > 0
+                    // don't save thumb - too large size
+                  }
+              );
+            }
+          }
+          packs.push(pack);
+        }
+
+        publishers.push({
+          publisher: moduleJsonContent.author ? moduleJsonContent.author : game.i18n.localize("mtte.unknown"),
+          website: moduleJsonContent.url ? moduleJsonContent.url : null,
+          packs
+        })
+        
+        idx++;
+      }
+    }
+    SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"),100);  
+    
+    return publishers
+  }
+
+  async onAction(classList) {
+    const FileUtil = game.moulinette.applications.MoulinetteFileUtil;
+    if(classList.contains("indexScenes")) {
+      ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
+      this.html.find(".indexScenes").prop("disabled", true);
+      let publishers = await MoulinetteScenes.scanScenes(MoulinetteScenes.FOLDER_MODULES);
+      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
+      ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
+      game.moulinette.cache.clear()
+      this.clearCache()
+      return true
+    }
+  }
 }

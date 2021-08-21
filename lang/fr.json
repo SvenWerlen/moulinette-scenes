@@ -21,6 +21,11 @@
   "mtte.imageURLToolTip": "Lien pour le t\u00e9l\u00e9chargement direct de l'image",
   "mtte.importScene": "Importer la sc\u00e8ne",
   "mtte.importSceneToolTip": "Importer la sc\u00e8ne dans votre monde",
+  "mtte.indexScenes": "Indexer les sc\u00e8nes",
+  "mtte.indexScenesToolTip": "Moulinette indexera les sc\u00e8nes des compendia locaux. Vous devez r\u00e9indexer chaque fois que les compendia changent.",
+  "mtte.indexingDone": "\u00c9l\u00e9ments index\u00e9s avec succ\u00e8s!",
+  "mtte.indexingInProgress": "Moulinette indexe vos \u00e9l\u00e9ments... veuillez patienter",
+  "mtte.indexingMoulinette": "Indexation de Moulinette",
   "mtte.learnMore": "pour apprendre plus \u00e0 propos de Moulinette et/ou le supporter.",
   "mtte.license": "License",
   "mtte.preview": "Pr\u00e9visualiser la sc\u00e8ne.",
@@ -38,5 +43,6 @@
   "mtte.sharePreview": "V\u00e9rifiez la pr\u00e9visualisation ci-dessous avant de soumettre",
   "mtte.shareSuccess": "La sc\u00e8ne a \u00e9t\u00e9 soumise \u00e0 Moulinette avec succ\u00e8s. Merci pour votre contribution!",
   "mtte.shareWelcome": "Vous \u00eates sur le point de partager une sc\u00e8ne avec la communaut\u00e9 Moulinette. Apr\u00e8s r\u00e9vision, la sc\u00e8ne sera mise \u00e0 disposition de tous.",
+  "mtte.unknown": "Inconnu",
   "mtte.unknownLicense": "Inconnue (local)"
 }

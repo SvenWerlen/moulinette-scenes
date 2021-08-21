@@ -1,7 +1,11 @@
 <form autocomplete="off" onsubmit="event.preventDefault();">
   <h3>{{pretty asset.data.name}} <small>({{filename}})</small></h3>
   <div class="scene">
-    <img id="previewImage" width="400" height="400" src="{{asset.baseURL}}.webp{{asset.sas}}" />
+    {{#if pack.isLocal}}
+        <img id="previewImage" width="400" height="400" src="{{asset.data.img}}" />
+    {{else}}
+        <img id="previewImage" width="400" height="400" src="{{asset.baseURL}}.webp{{asset.sas}}" />
+    {{/if}}
   </div>
   <p>  
     <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>.</i>
