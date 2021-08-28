@@ -285,7 +285,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       this.html.find(".indexScenes").prop("disabled", true);
       let publishers = await MoulinetteScenes.scanScenes(FileUtil.getSource(), MoulinetteScenes.FOLDER_MODULES);
       if(typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
-        publishers = [].concat(publishers, await MoulinetteScenes.scanScenes(MoulinetteScenes.FOLDER_MODULES, "forge-bazaar"))
+        publishers = [].concat(publishers, await MoulinetteScenes.scanScenes("forge-bazaar", MoulinetteScenes.FOLDER_MODULES))
       }
 
       await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
