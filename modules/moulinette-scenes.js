@@ -67,14 +67,19 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const basePath = r.data.img.substring(0, r.data.img.lastIndexOf('.'))
     r.baseURL = `${URL}${pack.path}/${basePath}`
     
-    // thumb is always same as image path but with _thumb appended, except for local scenes which have thumb stored in compendium .db
     const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
     const displayName = pack.isLocal ? r.data.name : filename;
     // ensure compendium is loaded before accessing it
     if(pack.isLocal && game.packs.get(r.filename).size === 0) {
        await game.packs.get(r.filename)?.getDocuments();
     }
-    const thumbSrc = pack.isLocal ? game.packs.get(r.filename).get(r.data.journalId).data.thumb : `${r.baseURL}_thumb.webp${r.sas}`;
+    // thumb is always same as image path but with _thumb appended, except for local scenes which have thumb stored in compendium .db
+    let thumbSrc = pack.isLocal ? game.packs.get(r.filename).get(r.data.journalId).data.thumb : `${r.baseURL}_thumb.webp${r.sas}`;
+    // scene packer: thumbnail doesn't have the _thumb part
+    if("tokens" in r.data) {
+      thumbSrc = `${r.baseURL}.webp${r.sas}`;
+    }
+
     let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${thumbSrc}"/>`
     html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
@@ -178,11 +183,11 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     }
   }
 
-  static async scanScenes(sourcePath) {
+  static async scanScenes(source, sourcePath) {
     const MoulinetteFileUtil = game.moulinette.applications.MoulinetteFileUtil;
 
     const debug = game.settings.get("moulinette-core", "debugScanAssets");
-    const source = MoulinetteFileUtil.getSource();
+
     // read publisher info from module.json
     let publishers = []
     if(debug) console.log(`Moulinette FileUtil | Root: scanning ${sourcePath} ...`)
@@ -278,7 +283,11 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     if(classList.contains("indexScenes")) {
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       this.html.find(".indexScenes").prop("disabled", true);
-      let publishers = await MoulinetteScenes.scanScenes(MoulinetteScenes.FOLDER_MODULES);
+      let publishers = await MoulinetteScenes.scanScenes(FileUtil.getSource(), MoulinetteScenes.FOLDER_MODULES);
+      if(typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
+        publishers = [].concat(publishers, await MoulinetteScenes.scanScenes(MoulinetteScenes.FOLDER_MODULES, "forge-bazaar"))
+      }
+
       await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
       ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
       game.moulinette.cache.clear()
