@@ -31,21 +31,3 @@ Hooks.once("ready", async function () {
     console.log("Moulinette Scenes | Module loaded")
   }
 });
-
-
-/**
- * Hook for submitting a scene
- */
-Hooks.on("getSceneDirectoryEntryContext", (html, options) => {
-  options.push({
-    name: game.i18n.localize("mtte.share"),
-    icon: '<i class="fas fa-cloud-upload-alt"></i>',
-    callback: async function(li) {
-      const scene = game.scenes.get(li.data("entityId"))
-      new MoulinetteShare(scene).render(true)
-    },
-    condition: li => {
-      return true;
-    },
-  });
-});
