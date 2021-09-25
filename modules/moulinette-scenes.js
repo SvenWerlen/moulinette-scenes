@@ -1,4 +1,5 @@
 import { MoulinettePreview } from "./moulinette-preview.js"
+import { MoulinetteAvailableSceneAssets } from "./moulinette-available.js"
 
 /**
  * Forge Module for scenes
@@ -16,6 +17,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.assets = null
     this.assetsPacks = null
     this.searchResults = null
+    this.matchesCloud = null
     this.pack = null
   }
   
@@ -30,6 +32,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/scenes/custom/index.json"])
 
     // remove non-scene
@@ -106,7 +109,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       return []
     }
     
-    searchTerms = searchTerms.split(" ")
+    const searchTermsList = searchTerms.split(" ")
     // filter list according to search terms and selected pack
     this.searchResults = this.assets.filter( t => {
       // pack doesn't match selection
@@ -114,7 +117,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       // publisher doesn't match selection
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
       // check if text match
-      for( const f of searchTerms ) {
+      for( const f of searchTermsList ) {
         if( t.data.name.toLowerCase().indexOf(f) < 0 && t.filename.toLowerCase().indexOf(f) < 0 ) return false
       }
       return true;
@@ -145,6 +148,9 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
         }
       }
     }
+
+    // retrieve available assets that the user doesn't have access to
+    this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "scenes", this.assetsPacks)
   
     return assets
   }
@@ -154,20 +160,46 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
    * Implements listeners
    */
   activateListeners(html) {
+    // keep html for later usage
+    this.html = html
+
     // click on preview
-    html.find(".scene").click(this._onPreview.bind(this));
-    html.find(".scene").mouseover(function(el) {
+    this.html.find(".scene").click(this._onPreview.bind(this));
+    this.html.find(".scene").mouseover(function(el) {
       $(el.currentTarget).find("img").css("opacity", "20%")
       $(el.currentTarget).find(".text").show()
     });
-    html.find(".scene").mouseout(function(el) {
+    this.html.find(".scene").mouseout(function(el) {
       $(el.currentTarget).find("img").css("opacity", "100%")
       $(el.currentTarget).find(".text").hide()
     });
-    
-    this.html = html
+
+    // display/hide showCase
+    const showCase = this.html.find(".showcase")
+    if(this.matchesCloud && this.matchesCloud.length > 0) {
+      // display/hide additional content
+      let count = 0
+      this.matchesCloud.forEach( m => count += m.matches.length )
+      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: count}))
+      showCase.addClass("clickable")
+      const matches = this.matchesCloud
+      showCase.click(ev => new MoulinetteAvailableSceneAssets(duplicate(matches)).render(true))
+      showCase.show()
+    }
+    else {
+      showCase.html("")
+      showCase.removeClass("clickable")
+      showCase.hide()
+    }
   }
   
+
+  /**
+   * Footer: Dropmode
+   */
+  async getFooter() {
+    return `<div class="showcase"></div>`
+  }
   
   /**
    * Previews selected scene

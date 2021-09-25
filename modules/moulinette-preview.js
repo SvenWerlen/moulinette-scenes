@@ -16,7 +16,7 @@ export class MoulinettePreview extends FormApplication {
       title: game.i18n.localize("mtte.preview"),
       template: "modules/moulinette-scenes/templates/preview.hbs",
       width: 420,
-      height: 600,
+      height: 620,
       dragDrop: [{dragSelector: "#previewImage"}],
       closeOnSubmit: false,
       submitOnClose: false,
@@ -103,6 +103,14 @@ export class MoulinettePreview extends FormApplication {
     event.preventDefault();
     
     ui.scenes.activate() // give focus to scenes
+
+    // special case to delegate to Scene Packer
+    if("tokens" in this.asset.data) {
+      const baseURL = this.asset.baseURL.split("/mtte/")[0]
+      alert(`Ready for Scene Packer\n:\n- Basepath: ${baseURL}\n- Sas: ${this.asset.sas}\n- Scene: ${this.asset.filename}`)
+      return
+    }
+
     try {
       let jsonAsText;
       

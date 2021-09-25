@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2021-09-25
+### Fixed
+- Support for 0.8.9
+### Added
+- Support for Moulinette Cloud (private storage)
+- Previews (available scenes on Moulinette Cloud)
+- Export a scene for Moulinette Cloud
+
 ## [2.8.3] - 2021-08-21
 ### Fixed
 - 2.8.1 & 2.8.2: Indexing scenes from Forge Bazaar not working

@@ -1,0 +1,17 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <p>{{localize "mtte.exportWelcome"}}</p>
+  {{#if error}}
+  <div class="error">{{error}}</div>
+  {{/if}}
+  <div class="form-group">
+    <label><b>{{localize "mtte.sceneName"}}</b></label>
+    <label><input class="sceneName" type="text" name="sceneName" value="{{sceneName}}" maxLength="50" /></label>
+  </div>
+  <footer>
+    <div class="actions">
+      <button type="submit" value="{{localize "mtte.exportButton"}}">{{localize "mtte.exportButton"}}</button>
+    </div>
+  </footer>
+  </p>
+  
+</form>

@@ -1,11 +1,9 @@
 
-import { MoulinetteShare } from "./modules/moulinette-share.js"
+import { MoulinetteExport } from "./modules/moulinette-export.js"
 
 
 Hooks.once("init", async function () {
   console.log("Moulinette Scenes | Init")
-  game.settings.register("moulinette", "shareImgAuthor", { scope: "world", config: false, type: String });
-  game.settings.register("moulinette", "shareDiscordId", { scope: "world", config: false, type: String });
 })
 
 /**
@@ -30,4 +28,22 @@ Hooks.once("ready", async function () {
     
     console.log("Moulinette Scenes | Module loaded")
   }
+});
+
+
+/**
+ * Hook for submitting a scene
+ */
+Hooks.on("getSceneDirectoryEntryContext", (html, options) => {
+  options.push({
+    name: game.i18n.localize("mtte.export"),
+    icon: '<i class="fas fa-cloud-upload-alt"></i>',
+    callback: async function(li) {
+      const scene = game.scenes.get(li.data("entityId"))
+      new MoulinetteExport(scene).render(true)
+    },
+    condition: li => {
+      return true;
+    },
+  });
 });
