@@ -25,6 +25,12 @@ export class MoulinettePreview extends FormApplication {
   
   async getData() { 
     const filename = this.asset.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
+
+    // detect if scene packer
+    if("tokens" in this.asset.data) {
+      this.asset.baseURL += "_thumb"
+    }
+
     return { asset: this.asset, pack: this.pack, filename: filename }
   }
 
@@ -106,8 +112,12 @@ export class MoulinettePreview extends FormApplication {
 
     // special case to delegate to Scene Packer
     if("tokens" in this.asset.data) {
-      const baseURL = this.asset.baseURL.split("/mtte/")[0]
-      alert(`Ready for Scene Packer\n:\n- Basepath: ${baseURL}\n- Sas: ${this.asset.sas}\n- Scene: ${this.asset.filename}`)
+      const baseURL = `/assets/${game.moulinette.user.id}/${this.pack.packId}`
+      const client = new game.moulinette.applications.MoulinetteClient()
+      const packInfo = await client.get(baseURL)
+      console.log(`Moulinette Preview | API for ScenePacker : ${baseURL}`)
+      console.log("Moulinette Preview | Result", packInfo)
+      alert(`Ready for Scene Packer:\n- Basepath: ${baseURL}\n- Scene: ${this.asset.filename}`)
       return
     }
 

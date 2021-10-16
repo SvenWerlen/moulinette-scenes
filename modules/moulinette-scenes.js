@@ -79,11 +79,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     }
     // thumb is always same as image path but with _thumb appended, except for local scenes which have thumb stored in compendium .db
     let thumbSrc = pack.isLocal ? game.packs.get(r.filename).get(r.data.journalId).data.thumb : `${r.baseURL}_thumb.webp${r.sas}`;
-    // scene packer: thumbnail doesn't have the _thumb part
-    if("tokens" in r.data) {
-      thumbSrc = `${r.baseURL}.webp${r.sas}`;
-    }
-
     let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${thumbSrc}"/>`
     html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
