@@ -66,3 +66,16 @@
   font-size: large;
   display: none;
 }
+
+.mtte .progressBlock {
+  visibility: hidden;
+  margin-top: 15px;
+  color: darkgreen;
+}
+
+.mtte .progressBar {
+  height: 15px;
+  width: 0%;
+  background-color: darkgreen;
+  border-radius: 6px;
+}

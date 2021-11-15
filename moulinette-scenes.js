@@ -31,30 +31,13 @@ Hooks.once("ready", async function () {
 });
 
 
-/**
- * Hook for submitting a scene
- */
-Hooks.on("getSceneDirectoryEntryContext", (html, options) => {
-  options.push({
-    name: game.i18n.localize("mtte.export"),
-    icon: '<i class="fas fa-cloud-upload-alt"></i>',
-    callback: async function(li) {
-      const scene = game.scenes.get(li.data("entityId"))
-      new MoulinetteExport(scene, null).render(true)
-    },
-    condition: li => {
-      return true;
-    },
-  });
-});
-
 Hooks.on("getSceneDirectoryFolderContext", (html, options) => {
   options.push({
     name: game.i18n.localize("mtte.export"),
     icon: '<i class="fas fa-cloud-upload-alt"></i>',
     callback: async function(li) {
       const folder = game.folders.get($(li).closest("li").data("folderId"))
-      new MoulinetteExport(null, folder).render(true)
+      new MoulinetteExport(folder).render(true)
     },
     condition: li => {
       return true;
