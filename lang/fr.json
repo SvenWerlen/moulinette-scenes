@@ -24,7 +24,7 @@
   "mtte.exportButton": "Exporter les sc\u00e8nes",
   "mtte.exportCount": "Nombre de sc\u00e8nes \u00e0 exporter",
   "mtte.exportCreator": "Cr\u00e9ateur",
-  "mtte.exportCreatorHint": "Le cr\u00e9ateur est toujours 'Moulinette Private'. Vous ne pouvez pas le changer.",
+  "mtte.exportCreatorHint": "Le cr\u00e9ateur est 'Moulinette Private' par d\u00e9faut. Vous pouvez le changer.",
   "mtte.exportError": "Erreur. V\u00e9rifiez les logs!",
   "mtte.exportErrorLogin": "Veuillez lier votre compte Patreon avec Moulinette pour utiliser cette fonctionnalit\u00e9!",
   "mtte.exportErrorPatron": "Moulinette Cloud (private storage) n'est pas disponible pour vous. Cela n\u00e9cessite de supporter Moulinette avec \"Dwarf Blacksmith\" ($5/mo) ou plus.",

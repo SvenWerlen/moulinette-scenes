@@ -88,11 +88,10 @@ export class MoulinetteExport extends FormApplication {
    * to be uploaded (triggers a cleanup/initialization on the server). "Last" should only be
    * used on the very last file (triggers the preparation of the pack)
    */
-  static async exportScene(scene, folder, scIdx, count, exportAll = false) {
+  static async exportScene(scene, folder, creatorName, packName, scIdx, count, exportAll = false) {
     const sceneNameClean = scene.name.replace(/ /g, "-").replace(/[^\w-_]+/g, '')
     const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
-    const FOLDER = "moulinette/export/creatorName-packName"
-    const SUBFOLDER = FOLDER + "/deps"
+    packName = `${creatorName}-${packName}`
 
     // get relative path
     const rootFolders = MoulinetteExport.getFolderPath(folder)
@@ -106,7 +105,7 @@ export class MoulinetteExport extends FormApplication {
     if(! await FILEUTIL.uploadToMoulinette(
       new File([blob], sceneNameClean + "_thumb.png", { type: blob.type, lastModified: new Date() }), scenePath,
       scIdx == 0 ? "first" : "-",
-      folder.name)) {
+      packName)) {
       return false;
     }
 
@@ -136,7 +135,6 @@ export class MoulinetteExport extends FormApplication {
     for(const path of paths) {
       idx++
       let filename = path.split("/").pop()
-      const filepath = SUBFOLDER + "/" + filename
       let res = await fetch(path)
       if(!res || res.status != 200) { return false; }
       const blob = await res.blob()
@@ -145,7 +143,7 @@ export class MoulinetteExport extends FormApplication {
         new File([blob], decodeURIComponent(filename), { type: blob.type, lastModified: new Date() }),
         sceneDepsPath,
         "-", // state
-        folder.name)) {
+        packName)) {
         return false;
       }
 
@@ -162,7 +160,7 @@ export class MoulinetteExport extends FormApplication {
       new File([jsonData], jsonFile, { type: "application/json", lastModified: new Date() }),
       scenePath,
       scIdx == count-1 ? "last" : "-",
-      folder.name)) {
+      packName)) {
       return false;
     }
 
@@ -178,6 +176,8 @@ export class MoulinetteExport extends FormApplication {
     }
 
     const exportAll = inputs.exportAll
+    const creatorName = inputs.creator.length > 0 ? inputs.creator : "Moulinette Private"
+    const packName = inputs.pack.length > 0 ? inputs.pack : this.folder.name
 
     this.html.find("button").prop('disabled', true)
     this.html.find(".progressBlock").css("visibility", "visible");
@@ -189,7 +189,7 @@ export class MoulinetteExport extends FormApplication {
     let scenes = MoulinetteExport.getScenesFromFolder(this.folder)
     let idx = 0
     for(const sc of scenes) {
-      const ok = await MoulinetteExport.exportScene(sc, this.folder, idx, scenes.length, exportAll)
+      const ok = await MoulinetteExport.exportScene(sc, this.folder, creatorName, packName, idx, scenes.length, exportAll)
       if(!ok) {
         this.html.find(".progressBlock").css("color", "darkred");
         this.html.find(".progressBar").css("background-color", "darkred")

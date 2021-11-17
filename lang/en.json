@@ -24,7 +24,7 @@
   "mtte.exportButton": "Export scenes",
   "mtte.exportCount": "Number of scenes to export",
   "mtte.exportCreator": "Creator",
-  "mtte.exportCreatorHint": "The creator is always 'Moulinette Private'. You cannot change it.",
+  "mtte.exportCreatorHint": "The creator is 'Moulinette Private' by default. You can change it.",
   "mtte.exportError": "Error. Check the logs!",
   "mtte.exportErrorLogin": "Please link your Patreon account with Moulinette to use that feature!",
   "mtte.exportErrorPatron": "Moulinette Cloud (private storage) is not available for you. It requires supporting Moulinette with tier \"Dwarf Blacksmith\" ($5/mo) or more.",
