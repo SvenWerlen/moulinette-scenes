@@ -138,12 +138,14 @@ export class MoulinetteExport extends FormApplication {
       let res = await fetch(path)
       if(!res || res.status != 200) { return false; }
       const blob = await res.blob()
-      console.log(decodeURIComponent(filename))
       if(! await FILEUTIL.uploadToMoulinette(
-        new File([blob], decodeURIComponent(filename), { type: blob.type, lastModified: new Date() }),
-        sceneDepsPath,
-        "-", // state
-        packName)) {
+          new File([blob], decodeURIComponent(filename), { type: blob.type, lastModified: new Date() }),
+          sceneDepsPath,
+          "-", // state
+          packName)) {
+
+        console.error(`MoulinetteExport | 1) Check that the size of file '${path}' is not larger than 10MB!`)
+        console.error(`MoulinetteExport | 2) Chrome browser sometimes blocks binary files like images. Give a try with another browser like Firefox!`)
         return false;
       }
 
