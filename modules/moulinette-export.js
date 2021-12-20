@@ -106,6 +106,7 @@ export class MoulinetteExport extends FormApplication {
       new File([blob], sceneNameClean + "_thumb.png", { type: blob.type, lastModified: new Date() }), scenePath,
       scIdx == 0 ? "first" : "-",
       packName)) {
+      console.error(`Moulinette Export | Failed to upload thumbnail for scene '${scene.name}'`)
       return false;
     }
 
@@ -136,14 +137,17 @@ export class MoulinetteExport extends FormApplication {
       idx++
       let filename = path.split("/").pop()
       let res = await fetch(path)
-      if(!res || res.status != 200) { return false; }
+      if(!res || res.status != 200) {
+        console.error(`Moulinette Export | Failed to download asset '${path}' (scene '${scene.name}')`)
+        return false;
+      }
       const blob = await res.blob()
-      console.log(decodeURIComponent(filename))
       if(! await FILEUTIL.uploadToMoulinette(
         new File([blob], decodeURIComponent(filename), { type: blob.type, lastModified: new Date() }),
         sceneDepsPath,
         "-", // state
         packName)) {
+        console.error(`Moulinette Export | Failed to upload asset '${path}' (scene '${scene.name}'). Make sure that the asset is 10 MB or LESS!`)
         return false;
       }
 
@@ -161,6 +165,7 @@ export class MoulinetteExport extends FormApplication {
       scenePath,
       scIdx == count-1 ? "last" : "-",
       packName)) {
+      console.error(`Moulinette Export | Failed to upload data for scene '${scene.name}'`)
       return false;
     }
 
