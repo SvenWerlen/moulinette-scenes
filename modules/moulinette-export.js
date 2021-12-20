@@ -136,12 +136,18 @@ export class MoulinetteExport extends FormApplication {
     for(const path of paths) {
       idx++
       let filename = path.split("/").pop()
-      let res = await fetch(path)
-      if(!res || res.status != 200) {
-        console.error(`Moulinette Export | Failed to download asset '${path}' (scene '${scene.name}')`)
+      let blob = null
+      try {
+        const res = await fetch(path)
+        if(!res || res.status != 200) {
+          console.error(`Moulinette Export | Failed to download asset '${path}' (scene '${scene.name}')`)
+          return false;
+        }
+        blob = await res.blob()
+      } catch( err ) {
+        console.error(`Moulinette Export | Exception while downloading asset '${path}' (scene '${scene.name}')`)
         return false;
       }
-      const blob = await res.blob()
       if(! await FILEUTIL.uploadToMoulinette(
           new File([blob], decodeURIComponent(filename), { type: blob.type, lastModified: new Date() }),
           sceneDepsPath,
