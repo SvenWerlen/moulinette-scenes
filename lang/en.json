@@ -66,5 +66,6 @@
   "mtte.showCaseAssets": "There are {count} assets matching your criteria on Moulinette Cloud. Click to preview them.",
   "mtte.subscribe": "Subscribe",
   "mtte.unknown": "Unknown",
-  "mtte.unknownLicense": "Unknown (local)"
+  "mtte.unknownLicense": "Unknown (local)",
+  "mtte.visitCloud": "Moulinette Cloud"
 }

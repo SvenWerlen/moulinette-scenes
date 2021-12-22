@@ -135,7 +135,11 @@ export class MoulinetteExport extends FormApplication {
     let idx = 0
     for(const path of paths) {
       idx++
-      let filename = path.split("/").pop()
+      let filename = path.split("/").pop()                                  // filename only
+      let basePath = path.substring(0, path.length - filename.length - 1)   // basePath (parent)
+      if(basePath.startsWith("http")) {                                     // if image is stored remotely, extract the basePath from the URL
+        basePath = (new URL(basePath)).pathname.substring(1)
+      }
       let blob = null
       try {
         const res = await fetch(path)
@@ -150,7 +154,7 @@ export class MoulinetteExport extends FormApplication {
       }
       if(! await FILEUTIL.uploadToMoulinette(
           new File([blob], decodeURIComponent(filename), { type: blob.type, lastModified: new Date() }),
-          sceneDepsPath,
+          `${sceneDepsPath}/${basePath}`,
           "-", // state
           packName)) {
         console.error(`Moulinette Export | Failed to upload asset '${path}' (scene '${scene.name}').`)
@@ -163,7 +167,7 @@ export class MoulinetteExport extends FormApplication {
       if(filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
         filename = filename.substring(0, filename.lastIndexOf(".")) + ".webp"
       }
-      jsonData = jsonData.replaceAll(path, "#DEP#" + decodeURIComponent(`deps/${filename}`))
+      jsonData = jsonData.replaceAll(path, "#DEP#" + decodeURIComponent(`deps/${basePath}/${filename}`))
     }
 
     // upload JSON
@@ -186,6 +190,9 @@ export class MoulinetteExport extends FormApplication {
     const button = event.submitter;
     if(button.classList.contains("cancel")) {
       return this.close()
+    }
+    else if(button.classList.contains("cloud")) {
+      return window.open("https://assets.moulinette.cloud/byoa/manage-assets", '_blank');
     }
 
     const exportAll = inputs.exportAll

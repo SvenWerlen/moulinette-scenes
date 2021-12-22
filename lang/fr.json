@@ -66,5 +66,6 @@
   "mtte.showCaseAssets": "{count} images correspondant \u00e0 vos crit\u00e8res ont \u00e9t\u00e9 trouv\u00e9s sur Moulinette Cloud. Cliquer pour les pr\u00e9visualiser.",
   "mtte.subscribe": "S'abonner",
   "mtte.unknown": "Inconnu",
-  "mtte.unknownLicense": "Inconnue (local)"
+  "mtte.unknownLicense": "Inconnue (local)",
+  "mtte.visitCloud": "Moulinette Cloud"
 }
