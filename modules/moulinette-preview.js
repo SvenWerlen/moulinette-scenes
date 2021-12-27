@@ -88,14 +88,14 @@ export class MoulinettePreview extends FormApplication {
     // publisher level
     let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
     if( publisherFolder.length == 0 ) {
-      publisherFolder = await Folder.create({name: publisher, type: "Scene", parent: moulinetteFolder._id })
+      publisherFolder = await Folder.create({name: publisher, type: "Scene", parent: moulinetteFolder.id })
     } else {
       publisherFolder = publisherFolder[0]
     }
     // pack level
     let packFolder = publisherFolder.children.filter( c => c.name == pack )
     if( packFolder.length == 0 ) {
-      packFolder = await Folder.create({name: pack, type: "Scene", parent: publisherFolder._id })
+      packFolder = await Folder.create({name: pack, type: "Scene", parent: publisherFolder.id })
     } else {
       packFolder = packFolder[0]
     }
@@ -117,7 +117,14 @@ export class MoulinettePreview extends FormApplication {
       const packInfo = await client.get(baseURL)
       console.log(`Moulinette Preview | API for ScenePacker : ${baseURL}`)
       console.log("Moulinette Preview | Result", packInfo)
-      alert(`Ready for Scene Packer:\n- Basepath: ${baseURL}\n- Scene: ${this.asset.filename}`)
+
+      const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data})
+
+      if (moulinetteImporter) {
+        return moulinetteImporter.process({sceneID: this.asset.filename, actorID: ''})
+      }
+
+      //alert(`Ready for Scene Packer:\n- Basepath: ${baseURL}\n- Scene: ${this.asset.filename}`)
       return
     }
 

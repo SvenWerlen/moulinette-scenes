@@ -72,7 +72,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     r.baseURL = `${URL}${pack.path}/${basePath}`
     
     const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
-    const displayName = pack.isLocal ? r.data.name : filename;
+    const displayName = r.data.name;
     // ensure compendium is loaded before accessing it
     if(pack.isLocal && game.packs.get(r.filename)?.size === 0) {
        await game.packs.get(r.filename)?.getDocuments();
