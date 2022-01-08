@@ -1,0 +1,32 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+
+  {{#if sceneName}}<p>{{localize "mtte.exportLocalWelcome"}}</p>{{/if}}
+  {{#unless sceneName}}<p>{{localize "mtte.exportLocalFolderWelcome"}}</p>{{/unless}}
+
+  {{#if error}}
+  <div class="error">{{error}}</div>
+  {{/if}}
+
+  {{#if sceneName}}
+  <div class="form-group">
+    <label><b>{{localize "mtte.sceneName"}}</b></label>
+    <label><input class="sceneName" type="text" name="sceneName" value="{{sceneName}}" maxLength="50" /></label>
+  </div>
+  {{/if}}
+  <div class="form-group">
+    <label><b>{{localize "mtte.sceneFolder"}}</b></label>
+    <label>{{sceneFolder}}</label>
+  </div>
+  <div class="form-group">
+    <label><b>{{localize "mtte.exportAll"}}</b> <i class="fas fa-question-circle" title="{{localize "mtte.exportAllHint"}}"></i></label>
+    <label><input class="exportAll" type="checkbox" name="exportAll" value="0" /></label>
+  </div>
+  <footer>
+    <div class="actions">
+      <button class="flat" type="submit" value="{{localize "mtte.exportButton"}}">{{localize "mtte.exportButton"}}</button>
+      <button class="expanded" type="submit" value="{{localize "mtte.exportButtonFolder"}}">{{localize "mtte.exportButtonFolder"}}</button>
+    </div>
+  </footer>
+  </p>
+
+</form>

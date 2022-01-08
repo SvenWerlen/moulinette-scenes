@@ -39,7 +39,7 @@ Hooks.on("getSceneDirectoryEntryContext", (html, options) => {
     name: game.i18n.localize("mtte.localexport"),
     icon: '<i class="fas fa-upload"></i>',
     callback: async function(li) {
-      const scene = game.scenes.get(li.data("entityId"))
+      const scene = game.scenes.get(li.data("documentId"))
       new MoulinetteLocalExport(scene, null).render(true)
     },
     condition: li => {
