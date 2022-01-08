@@ -207,8 +207,15 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     
     if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
       const result = this.searchResults[idx-1]
-      new MoulinettePreview(duplicate(result), duplicate(this.assetsPacks[result.pack])).render(true)
+      this.previewScene(result, this.assetsPacks[result.pack])
     }
+  }
+
+  /**
+   * Opens scene preview UI
+   */
+  previewScene(tile, pack) {
+    new MoulinettePreview(duplicate(tile), duplicate(pack)).render(true)
   }
 
   static async scanScenes(source, sourcePath) {
