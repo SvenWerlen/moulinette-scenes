@@ -1,0 +1,211 @@
+/*************************
+ * Export a scene (locally)
+ *************************/
+export class MoulinetteLocalExport extends FormApplication {
+
+  constructor(folder) {
+    super()
+    this.folder = folder;
+  }
+
+  static get defaultOptions() {
+    return mergeObject(super.defaultOptions, {
+      id: "moulinette-export",
+      classes: ["mtte", "export"],
+      title: game.i18n.localize("mtte.export"),
+      template: "modules/moulinette-scenes/templates/export.hbs",
+      width: 600,
+      height: "auto",
+      closeOnSubmit: false,
+      submitOnClose: false,
+    });
+  }
+
+  async getData() {
+    const folders = MoulinetteLocalExport.getFolderPath(this.folder)
+    const user = await game.moulinette.applications.Moulinette.getUser()
+    let error = null
+    if(!user.patron) {
+      error = game.i18n.localize("mtte.exportErrorLogin")
+    } else if(!user.hasEarlyAccess()) {
+      error = game.i18n.localize("mtte.exportErrorPatron")
+    }
+
+    return {
+      sceneFolder: folders,
+      creator: "Moulinette Private",
+      pack: this.folder.name,
+      count: MoulinetteLocalExport.getScenesFromFolder(this.folder).length,
+      error: error
+    };
+  }
+
+  /**
+   * Implements listeners
+   */
+  activateListeners(html) {
+    this.html = html
+  }
+
+  /**
+   * Returns the folder paths recursively
+   */
+  static getFolderPath(folder) {
+    if(!folder) {
+      return ""
+    }
+
+    if(folder.data.parent) {
+      const parent = game.folders.get(folder.data.parent)
+      if( parent ) {
+        return MoulinetteLocalExport.getFolderPath(parent) + "/" + folder.name
+      }
+    }
+    return folder.data.name
+  }
+
+  /**
+   * Returns all the scenes from folder
+   */
+  static getScenesFromFolder(folder) {
+    let scenes = game.scenes.filter(sc => sc.data.folder == folder.id)
+    const subFolders = game.folders.filter(f => f.data.parent == folder.id)
+    for(const subFolder of subFolders) {
+      scenes = scenes.concat(MoulinetteLocalExport.getScenesFromFolder(subFolder))
+    }
+    return scenes;
+  }
+
+  /**
+   * Exports a scene to Moulinette Cloud
+   * - scene     : scene (data)
+   * - folder    : root folder
+   * - scIdx     : index of the current scene
+   * - count     : number of scenes in the pack
+   * - exportAll : true if assets from /modules and /system must be exported, too
+   *
+   * Developer notes regarding "state". "First" should only be used on the very first file
+   * to be uploaded (triggers a cleanup/initialization on the server). "Last" should only be
+   * used on the very last file (triggers the preparation of the pack)
+   */
+  static async exportScene(scene, folder, creatorName, packName, scIdx, count, exportAll = false) {
+    const sceneNameClean = scene.name.replace(/ /g, "-").replace(/[^\w-_]+/g, '')
+    const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
+    packName = `${creatorName}-${packName}`
+
+    // get relative path
+    const rootFolders = MoulinetteLocalExport.getFolderPath(folder)
+    const sceneFolders = MoulinetteLocalExport.getFolderPath(scene.folder)
+    const scenePath = sceneFolders.substring(rootFolders.length + 1)
+    const sceneDepsPath = "deps"
+
+    // regenerate thumbnail
+    const thumb = await scene.createThumbnail({width:400, height:400})
+    const blob = FILEUTIL.b64toBlob(thumb.thumb)
+    if(! await FILEUTIL.uploadToMoulinette(
+      new File([blob], sceneNameClean + "_thumb.png", { type: blob.type, lastModified: new Date() }), scenePath,
+      scIdx == 0 ? "first" : "-",
+      packName)) {
+      return false;
+    }
+
+    // remove tokens (won't work) and thumb (will be regenerated)
+    scene = duplicate(scene.data)
+    scene.tokens = []
+    delete(scene.thumb)
+
+    // export as JSON & detect potential paths
+    const paths = new Set();
+    let jsonData = JSON.stringify(scene)
+    const regex = new RegExp('"([^"]+/[^"]+)"', "g")
+    const matches = jsonData.matchAll(regex)
+    if(matches) {
+      for(const m of matches) {
+        if(m[1].indexOf(".") > -1) {
+          // export modules/ and systems
+          if(exportAll || (!m[1].startsWith("modules/") && !m[1].startsWith("systems/") && !m[1].startsWith("icons/"))) {
+            paths.add(m[1])
+          }
+        }
+      }
+    }
+
+    // upload all assets
+    let idx = 0
+    for(const path of paths) {
+      idx++
+      let filename = path.split("/").pop()
+      let res = await fetch(path)
+      if(!res || res.status != 200) { return false; }
+      const blob = await res.blob()
+      console.log(decodeURIComponent(filename))
+      if(! await FILEUTIL.uploadToMoulinette(
+        new File([blob], decodeURIComponent(filename), { type: blob.type, lastModified: new Date() }),
+        sceneDepsPath,
+        "-", // state
+        packName)) {
+        return false;
+      }
+
+      // images get converted to WEBP
+      if(filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+        filename = filename.substring(0, filename.lastIndexOf(".")) + ".webp"
+      }
+      jsonData = jsonData.replaceAll(path, "#DEP#" + decodeURIComponent(`deps/${filename}`))
+    }
+
+    // upload JSON
+    const jsonFile = sceneNameClean + ".json"
+    if(! await FILEUTIL.uploadToMoulinette(
+      new File([jsonData], jsonFile, { type: "application/json", lastModified: new Date() }),
+      scenePath,
+      scIdx == count-1 ? "last" : "-",
+      packName)) {
+      return false;
+    }
+
+    return true
+  }
+
+
+  async _updateObject(event, inputs) {
+    event.preventDefault();
+    const button = event.submitter;
+    if(button.classList.contains("cancel")) {
+      return this.close()
+    }
+
+    const exportAll = inputs.exportAll
+    const creatorName = inputs.creator.length > 0 ? inputs.creator : "Moulinette Private"
+    const packName = inputs.pack.length > 0 ? inputs.pack : this.folder.name
+
+    this.html.find("button").prop('disabled', true)
+    this.html.find(".progressBlock").css("visibility", "visible");
+    this.html.find(".progressBlock").css("color", "darkgreen");
+    this.html.find(".progressBlock .progress").text("1%")
+    this.html.find(".progressBar").css("background-color", "darkgreen")
+    this.html.find(".progressBar").width("1%")
+
+    let scenes = MoulinetteLocalExport.getScenesFromFolder(this.folder)
+    let idx = 0
+    for(const sc of scenes) {
+      const ok = await MoulinetteLocalExport.exportScene(sc, this.folder, creatorName, packName, idx, scenes.length, exportAll)
+      if(!ok) {
+        this.html.find(".progressBlock").css("color", "darkred");
+        this.html.find(".progressBar").css("background-color", "darkred")
+        this.html.find(".progressBlock .progress").text(game.i18n.localize("mtte.exportError"))
+        this.html.find("button").prop('disabled', false)
+        return;
+      }
+
+      idx++
+      const progress = Math.round((idx / scenes.length)*100)
+      this.html.find(".progressBlock .progress").text(`${progress}%`)
+      this.html.find(".progressBar").width(`${progress}%`)
+    }
+
+    this.html.find(".progressBlock .progress").text("100%")
+    this.html.find(".progressBar").width("100%")
+    this.html.find("button").prop('disabled', false)
+  }
+}
