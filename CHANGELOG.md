@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.0] - 2021-01-08
 ### Changed
-- Re-introduced scenes local export (used by some creators)
+- Scenes local export (used by some creators)
 
 ## [3.0.1] - 2021-12-24
 ### Fixed
