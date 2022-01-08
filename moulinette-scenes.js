@@ -1,5 +1,6 @@
 
 import { MoulinetteExport } from "./modules/moulinette-export.js"
+import { MoulinetteLocalExport } from "./modules/moulinette-localexport.js"
 
 
 Hooks.once("init", async function () {
@@ -30,6 +31,22 @@ Hooks.once("ready", async function () {
   }
 });
 
+/**
+ * Hook for submitting a scene
+ */
+Hooks.on("getSceneDirectoryEntryContext", (html, options) => {
+  options.push({
+    name: game.i18n.localize("mtte.localexport"),
+    icon: '<i class="fas fa-upload"></i>',
+    callback: async function(li) {
+      const scene = game.scenes.get(li.data("entityId"))
+      new MoulinetteLocalExport(scene, null).render(true)
+    },
+    condition: li => {
+      return true;
+    },
+  });
+});
 
 Hooks.on("getSceneDirectoryFolderContext", (html, options) => {
   options.push({
@@ -38,6 +55,17 @@ Hooks.on("getSceneDirectoryFolderContext", (html, options) => {
     callback: async function(li) {
       const folder = game.folders.get($(li).closest("li").data("folderId"))
       new MoulinetteExport(folder).render(true)
+    },
+    condition: li => {
+      return true;
+    },
+  });
+  options.push({
+    name: game.i18n.localize("mtte.localexport"),
+    icon: '<i class="fas fa-upload"></i>',
+    callback: async function(li) {
+      const folder = game.folders.get($(li).closest("li").data("folderId"))
+      new MoulinetteLocalExport(null, folder).render(true)
     },
     condition: li => {
       return true;
