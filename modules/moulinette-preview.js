@@ -2,13 +2,13 @@
  * Preview
  *************************/
 export class MoulinettePreview extends FormApplication {
-  
+
   constructor(asset, pack) {
     super()
-    this.asset = asset;   
+    this.asset = asset;
     this.pack = pack;
   }
-  
+
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       id: "moulinette-preview",
@@ -22,8 +22,8 @@ export class MoulinettePreview extends FormApplication {
       submitOnClose: false,
     });
   }
-  
-  async getData() { 
+
+  async getData() {
     const filename = this.asset.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
 
     // detect if scene packer
@@ -39,7 +39,7 @@ export class MoulinettePreview extends FormApplication {
     this.bringToTop()
     html.find("button").click(this._onClick.bind(this))
   }
-  
+
   _onDragStart(event) {
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
@@ -47,7 +47,7 @@ export class MoulinettePreview extends FormApplication {
     const tile = duplicate(this.asset)
     tile.filename = tile.data.img
     delete tile.data
-    
+
     let dragData = {}
     if(mode == "tile") {
       dragData = {
@@ -68,11 +68,11 @@ export class MoulinettePreview extends FormApplication {
         tile: tile,
         pack: this.pack
       };
-    }    
+    }
     dragData.source = "mtte"
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
-  
+
   /**
    * Generates moulinette folders
    */
@@ -101,40 +101,46 @@ export class MoulinettePreview extends FormApplication {
     }
     return packFolder
   }
-  
+
   /*************************************
    * Main action
    ************************************/
   async _onClick(event) {
     event.preventDefault();
-    
+
     ui.scenes.activate() // give focus to scenes
 
     // special case to delegate to Scene Packer
-    if("tokens" in this.asset.data) {
+    if("tokens" in this.asset.data && typeof ScenePacker === 'object' && typeof ScenePacker.MoulinetteImporter === 'function') {
       const baseURL = `/assets/${game.moulinette.user.id}/${this.pack.packId}`
       const client = new game.moulinette.applications.MoulinetteClient()
       const packInfo = await client.get(baseURL)
       console.log(`Moulinette Preview | API for ScenePacker : ${baseURL}`)
+      console.log(`Moulinette Preview | Asset for ScenePacker`, this.asset)
       console.log("Moulinette Preview | Result", packInfo)
-
-      const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data})
-
-      if (moulinetteImporter) {
-        return moulinetteImporter.process({sceneID: this.asset.filename, actorID: ''})
+      if (packInfo.status === 200) {
+        try {
+          let sceneID = this.asset.data.type === 'scene' ? this.asset.filename : ''
+          let actorID = this.asset.data.type === 'actor' ? this.asset.filename : ''
+          const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID, actorID})
+          if (moulinetteImporter) {
+            this.close()
+            return moulinetteImporter.render(true)
+          }
+        } catch(e) {
+          console.log(`Moulinette | Unhandled exception`, e)
+          ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
+        }
       }
-
-      //alert(`Ready for Scene Packer:\n- Basepath: ${baseURL}\n- Scene: ${this.asset.filename}`)
-      return
     }
 
     try {
       let jsonAsText;
-      
+
       const img = document.getElementById("previewImage")
       this.close()
       ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
-      
+
       // Moulinette Cloud scenes
       if(this.asset.filename.endsWith(".json")) {
         // retrieve scene JSON
@@ -142,13 +148,13 @@ export class MoulinettePreview extends FormApplication {
           console.log(`Moulinette | Not able to fetch scene JSON`, e)
         });
         if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
-        
+
         // download all dependencies
         const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud")
-      
+
         // replace all DEPS
         jsonAsText = await response.text()
-        
+
         for(let i = 0; i<paths.length; i++) {
           jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
         }
@@ -168,7 +174,7 @@ export class MoulinettePreview extends FormApplication {
           return;
         }
       }
-      
+
       // adapt scene and create
 
       // ensure compendium is loaded before accessing it
@@ -179,18 +185,18 @@ export class MoulinettePreview extends FormApplication {
       const sceneData = this.asset.data.journalId ?
           JSON.parse(JSON.stringify(game.packs.get(this.asset.filename).get(this.asset.data.journalId).data)) :
           JSON.parse(jsonAsText);
-      
+
       // configure dimensions if no width/height set
       if( !("width" in sceneData)) {
         sceneData.width = img.naturalWidth
         sceneData.height = img.naturalHeight
       }
-      
+
       sceneData.folder = await MoulinettePreview.getOrCreateSceneFolder(this.pack.publisher, this.pack.name)
       let newScene = await Scene.create(sceneData);
       let tData = await newScene.createThumbnail()
       await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
-      
+
       ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
     } catch(e) {
       console.log(`Moulinette | Unhandled exception`, e)
