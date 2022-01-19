@@ -311,10 +311,15 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     if(classList.contains("indexScenes")) {
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       this.html.find(".indexScenes").prop("disabled", true);
+      // index from Data / My Asset Library (The Forge)
       let publishers = await MoulinetteScenes.scanScenes(FileUtil.getSource(), MoulinetteScenes.FOLDER_MODULES);
       if(typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
+        // index from Forge Bazaar
         publishers = [].concat(publishers, await MoulinetteScenes.scanScenes("forge-bazaar", MoulinetteScenes.FOLDER_MODULES))
+        // index for Forge UserData
+        publishers = [].concat(publishers, await MoulinetteScenes.scanScenes("data", MoulinetteScenes.FOLDER_MODULES))
       }
+
 
       await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
       ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
