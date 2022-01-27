@@ -111,21 +111,26 @@ export class MoulinettePreview extends FormApplication {
     ui.scenes.activate() // give focus to scenes
 
     // special case to delegate to Scene Packer
-    if("tokens" in this.asset.data) {
+    if("tokens" in this.asset.data && typeof ScenePacker === 'object' && typeof ScenePacker.MoulinetteImporter === 'function') {
       const baseURL = `/assets/${game.moulinette.user.id}/${this.pack.packId}`
       const client = new game.moulinette.applications.MoulinetteClient()
       const packInfo = await client.get(baseURL)
       console.log(`Moulinette Preview | API for ScenePacker : ${baseURL}`)
       console.log("Moulinette Preview | Result", packInfo)
-
-      const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data})
-
-      if (moulinetteImporter) {
-        return moulinetteImporter.process({sceneID: this.asset.filename, actorID: ''})
+      if (packInfo.status === 200) {
+        try {
+          let sceneID = this.asset.data.type === 'scene' ? this.asset.filename : ''
+          let actorID = this.asset.data.type === 'actor' ? this.asset.filename : ''
+          const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID, actorID})
+          if (moulinetteImporter) {
+            this.close()
+            return moulinetteImporter.render(true)
+          }
+        } catch(e) {
+          console.log(`Moulinette | Unhandled exception`, e)
+          ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
+        }
       }
-
-      //alert(`Ready for Scene Packer:\n- Basepath: ${baseURL}\n- Scene: ${this.asset.filename}`)
-      return
     }
 
     try {
