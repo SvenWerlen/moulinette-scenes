@@ -333,5 +333,9 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       this.clearCache()
       return true
     }
+    // ACTION - HELP / HOWTO
+    else if(classList.contains("howto")) {
+      new game.moulinette.applications.MoulinetteHelp("scenes").render(true)
+    }
   }
 }

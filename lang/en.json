@@ -39,6 +39,8 @@
   "mtte.exporting": "Exporting...",
   "mtte.forgingFailure": "Something went bad. Report it to Moulinette Discord",
   "mtte.forgingSuccess": "Scenes were successfully downloaded!",
+  "mtte.howto": "Help",
+  "mtte.howtoToolTip": "See the available documentation (dynamic).",
   "mtte.imageFrom": "Image from",
   "mtte.imageURL": "Image URL",
   "mtte.imageURLToolTip": "Provide a link to the image (direct link)",

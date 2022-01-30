@@ -37,6 +37,8 @@
   "mtte.exporting": "エクスポート中……",
   "mtte.forgingFailure": "エラーが発生しました。Moulinette CloudのDiscordまでご連絡ください。",
   "mtte.forgingSuccess": "シーンが正常にダウンロードされました。",
+  "mtte.howto": "ヘルプ",
+  "mtte.howtoToolTip": "使い方：新たな画像・タイルのインストール方法",
   "mtte.imageFrom": "画像元",
   "mtte.imageURL": "画像URL",
   "mtte.imageURLToolTip": "画像の直接リンクを提供してください。",
