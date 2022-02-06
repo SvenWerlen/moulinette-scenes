@@ -85,6 +85,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
     if(r.data.sounds) html += `<div class="info"><i class="fas fa-music"></i></div>`
     if(r.data.drawings) html += `<div class="info"><i class="fas fa-pencil-alt"></i></div>`
+    if(r.data.notes) html += `<div class="info"><i class="fas fa-book-open"></i></div>`
+    if(r.data.tokens) html += `<div class="info"><i class="fas fa-users"></i></div>`
     html += `</div><div class="resolutions">`
     // HD/4K
     if(basePath.indexOf("4K_") > 0) html += `<div class="info">4K</i></div>`
