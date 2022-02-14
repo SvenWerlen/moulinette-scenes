@@ -134,8 +134,8 @@ export class MoulinettePreview extends FormApplication {
           }
         }
       } else {
-        console.log("Moulinette | Lib ScenePacker is required to download that scene. See: https://foundryvtt.com/packages/scene-packer")
-        return ui.notifications.error(game.i18n.localize("mtte.scenepackerrequired"))
+        console.error(`Moulinette | ${game.i18n.localize("mtte.errorScenepackerRequired")}. See: https://foundryvtt.com/packages/scene-packer`)
+        return ui.notifications.error(game.i18n.localize("mtte.errorScenepackerRequired"))
       }
     }
 

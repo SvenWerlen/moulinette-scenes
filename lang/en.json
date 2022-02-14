@@ -17,6 +17,7 @@
   "mtte.errorMandatorySceneDesc": "Please provide a scene description",
   "mtte.errorMandatorySceneName": "Please provide a scene name",
   "mtte.errorMustAgree": "You must accept both conditions",
+  "mtte.errorScenepackerRequired": "Library: Scene Packer is required. Please install/enable this module.",
   "mtte.errorThumbnailGeneration": "Scene thumbnail couldn't be generated",
   "mtte.errorUnexpected": "Unexpected error from server. Check the logs!",
   "mtte.export": "Export to Moulinette Cloud",
