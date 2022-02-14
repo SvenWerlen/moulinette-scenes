@@ -1,38 +1,50 @@
 <form autocomplete="off" onsubmit="event.preventDefault();">
-  <h3>{{pretty asset.data.name}} <small>({{filename}})</small></h3>
-  <div class="scene">
-    {{#if pack.isLocal}}
-        <img id="previewImage" width="400" height="400" src="{{asset.data.img}}" />
-    {{else}}
-        <img id="previewImage" width="400" height="400" src="{{asset.baseURL}}.webp{{asset.sas}}" />
-    {{/if}}
-  </div>
-  <p>  
-    <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>.</i>
-  </p>
-  {{#if pack.pubWebsite}}
-  <p>  
-    {{localize "mtte.imageFrom"}} <a href="{{pack.pubWebsite}}" target="_blank">{{pack.publisher}}</a> (<a href="{{pack.url}}" target="_blank">{{pack.name}}</a>)
-  </p>
-  {{/if}}
-  {{#unless pack.pubWebsite}}
-  <p>  
-    {{localize "mtte.imageFrom"}} {{pack.publisher}} ({{pack.name}})
-  </p>
-  {{/unless}}
-  {{#if pack.licenseUrl}}
-  <p>  
-    {{localize "mtte.license"}} <a href="{{pack.licenseUrl}}" target="_blank">{{pack.license}}</a>
-  </p>
-  {{/if}}
-  {{#unless pack.pubWebsite}}
-  <p>  
-    {{localize "mtte.license"}} {{localize "mtte.unknownLicense"}}
-  </p>
-  {{/unless}}
-  <footer>
-    <div class="actions">
-      <button class="importScene" title="{{localize "mtte.importSceneToolTip"}}"><i class="fas fa-map"></i> {{localize "mtte.importScene"}}</button>
+  <div class="body">
+    <h3>{{pretty asset.data.name}} <small>({{filename}})</small></h3>
+    <div class="scene">
+      {{#unless asset.isVideo}}
+        {{#if pack.isLocal}}
+          <img id="previewImage" width="100%" height="100%" src="{{asset.data.img}}" />
+        {{else}}
+          <img id="previewImage" width="100%" height="100%" src="{{asset.baseURL}}.webp{{asset.sas}}" />
+        {{/if}}
+      {{/unless}}
+      {{#if asset.isVideo}}
+        <video id="previewImage" width="100%" height="100%" autoplay loop muted>
+          <source src="{{pack.path}}/{{asset.data.img}}{{asset.sas}}" type="video/webm">
+          Your browser does not support the video tag.
+        </video>
+      {{/if}}
     </div>
-  </footer>
+    <div class="infos">
+      <p>
+        <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>.</i>
+      </p>
+      {{#if pack.pubWebsite}}
+      <p>
+        {{localize "mtte.imageFrom"}} <a href="{{pack.pubWebsite}}" target="_blank">{{pack.publisher}}</a> (<a href="{{pack.url}}" target="_blank">{{pack.name}}</a>)
+      </p>
+      {{/if}}
+      {{#unless pack.pubWebsite}}
+      <p>
+        {{localize "mtte.imageFrom"}} {{pack.publisher}} ({{pack.name}})
+      </p>
+      {{/unless}}
+      {{#if pack.licenseUrl}}
+      <p>
+        {{localize "mtte.license"}} <a href="{{pack.licenseUrl}}" target="_blank">{{pack.license}}</a>
+      </p>
+      {{/if}}
+      {{#unless pack.pubWebsite}}
+      <p>
+        {{localize "mtte.license"}} {{localize "mtte.unknownLicense"}}
+      </p>
+      {{/unless}}
+    </div>
+    <footer>
+      <div class="actions">
+        <button class="importScene" title="{{localize "mtte.importSceneToolTip"}}"><i class="fas fa-map"></i> {{localize "mtte.importScene"}}</button>
+      </div>
+    </footer>
+  </div>
 </form>

@@ -20,6 +20,7 @@ export class MoulinettePreview extends FormApplication {
       dragDrop: [{dragSelector: "#previewImage"}],
       closeOnSubmit: false,
       submitOnClose: false,
+      resizable: true
     });
   }
 
@@ -29,6 +30,11 @@ export class MoulinettePreview extends FormApplication {
     // detect if scene packer
     if("tokens" in this.asset.data) {
       this.asset.baseURL += "_thumb"
+    }
+
+    // detect if video
+    if(this.asset.data.img.endsWith(".webm")) {
+      this.asset.isVideo = true
     }
 
     return { asset: this.asset, pack: this.pack, filename: filename }
@@ -122,7 +128,7 @@ export class MoulinettePreview extends FormApplication {
         try {
           let sceneID = this.asset.data.type === 'scene' ? this.asset.filename : ''
           let actorID = this.asset.data.type === 'actor' ? this.asset.filename : ''
-          const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID, actorID})
+          const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID: sceneID, actorID: actorID})
           if (moulinetteImporter) {
             this.close()
             return moulinetteImporter.render(true)
