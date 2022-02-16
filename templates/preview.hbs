@@ -18,7 +18,7 @@
     </div>
     <div class="infos">
       <p>
-        <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>.</i>
+        <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>. {{#if isScenePacker}}Built with <a href="https://github.com/League-of-Foundry-Developers/scene-packer" target="_blank">ScenePacker</a>.{{/if}}</i>
       </p>
       {{#if pack.pubWebsite}}
       <p>
@@ -28,16 +28,6 @@
       {{#unless pack.pubWebsite}}
       <p>
         {{localize "mtte.imageFrom"}} {{pack.publisher}} ({{pack.name}})
-      </p>
-      {{/unless}}
-      {{#if pack.licenseUrl}}
-      <p>
-        {{localize "mtte.license"}} <a href="{{pack.licenseUrl}}" target="_blank">{{pack.license}}</a>
-      </p>
-      {{/if}}
-      {{#unless pack.pubWebsite}}
-      <p>
-        {{localize "mtte.license"}} {{localize "mtte.unknownLicense"}}
       </p>
       {{/unless}}
     </div>

@@ -61,6 +61,7 @@
   "mtte.sceneDescToolTip": "Facilite la recherche de la scène",
   "mtte.sceneFolder": "Répertoire à exporter",
   "mtte.sceneName": "Nom de la scène",
+  "mtte.scenepackerpack": "Construit avec ScenePacker Library",
   "mtte.scenes": "Scènes",
   "mtte.scenesDescription": "Scènes disponibles pour Moulinette. Voir <a href=\"https://github.com/SvenWerlen/moulinette-data/tree/main/scenes\" target=\"_blank\">liste des scènes</a>.",
   "mtte.seeDoc": "Voir documentation",

@@ -10,6 +10,10 @@
   margin: 2px;
 }
 
+.mtte.forge .scene img.packer {
+  margin: 0px;
+}
+
 .mtte .thumb { 
   overflow: hidden;
   margin: auto;
@@ -33,7 +37,7 @@
   bottom: 10px;
 }
 
-.mtte .includes .info, .mtte .resolutions .info {
+.mtte .includes .info {
   margin-left: 8px;
   display: inline-block;
   width: 24px;
@@ -41,6 +45,22 @@
   line-height: 24px;
   box-sizing: content-box;
   font-size: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px #000;
+  color: #BBB;
+  text-align: center;
+  border: 1px solid #000;
+  border-radius: 5px;
+}
+
+.mtte .resolutions .info {
+  margin-left: 8px;
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  box-sizing: content-box;
+  font-size: 24px;
   background: rgba(0, 0, 0, 0.5);
   box-shadow: 0 0 10px #000;
   color: #BBB;

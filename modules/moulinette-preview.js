@@ -27,9 +27,12 @@ export class MoulinettePreview extends FormApplication {
   async getData() {
     const filename = this.asset.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
 
+    let scenePacker = false
+
     // detect if scene packer
     if("tokens" in this.asset.data) {
       this.asset.baseURL += "_thumb"
+      scenePacker = true
     }
 
     // detect if video
@@ -37,7 +40,7 @@ export class MoulinettePreview extends FormApplication {
       this.asset.isVideo = true
     }
 
-    return { asset: this.asset, pack: this.pack, filename: filename }
+    return { asset: this.asset, pack: this.pack, filename: filename, isScenePacker: scenePacker }
   }
 
   activateListeners(html) {
