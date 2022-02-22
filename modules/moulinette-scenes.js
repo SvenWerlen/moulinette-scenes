@@ -67,8 +67,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // sas (Shared access signature) for accessing remote files (Azure)
     r.sas = pack.sas ? "?" + pack.sas : ""
     
-    // two types of maps. JSON files or image only
-    const basePath = r.data.img.substring(0, r.data.img.lastIndexOf('.'))
+    // two use-cases
+    // - ScenePacker : basePath based on IMG location
+    // - Other cases : basePath based on JSON location
+    const basePath = "tokens" in r.data ? r.data.img.substring(0, r.data.img.lastIndexOf('.')) : r.filename.substring(0, r.filename.lastIndexOf('.'))
     r.baseURL = `${URL}${pack.path}/${basePath}`
     
     const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
