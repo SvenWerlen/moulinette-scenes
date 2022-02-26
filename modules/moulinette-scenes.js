@@ -81,7 +81,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     }
     // thumb is always same as image path but with _thumb appended, except for local scenes which have thumb stored in compendium .db
     let thumbSrc = pack.isLocal ? game.packs.get(r.filename)?.get(r.data.journalId).data.thumb : `${r.baseURL}_thumb.webp${r.sas}`;
-    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img width="200" height="200" src="${thumbSrc}"/>`
+    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img class="sc" width="200" height="200" src="${thumbSrc}"/>`
     html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
@@ -90,6 +90,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     if(r.data.notes) html += `<div class="info"><i class="fas fa-book-open"></i></div>`
     if(r.data.tokens) html += `<div class="info"><i class="fas fa-users"></i></div>`
     html += `</div><div class="resolutions">`
+    // Scene Packer
+    if("tokens" in r.data) html += `<div class="info" title="${game.i18n.localize("mtte.scenepackerpack")}"><img class="packer" src="modules/moulinette-scenes/img/scenepacker.svg"/></div>`
     // HD/4K
     if(basePath.indexOf("4K_") > 0) html += `<div class="info">4K</i></div>`
     else if(basePath.indexOf("HD_") > 0) html += `<div class="info">HD</i></div>`
@@ -166,11 +168,11 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // click on preview
     this.html.find(".scene").click(this._onPreview.bind(this));
     this.html.find(".scene").mouseover(function(el) {
-      $(el.currentTarget).find("img").css("opacity", "20%")
+      $(el.currentTarget).find("img.sc").css("opacity", "20%")
       $(el.currentTarget).find(".text").show()
     });
     this.html.find(".scene").mouseout(function(el) {
-      $(el.currentTarget).find("img").css("opacity", "100%")
+      $(el.currentTarget).find("img.sc").css("opacity", "100%")
       $(el.currentTarget).find(".text").hide()
     });
 

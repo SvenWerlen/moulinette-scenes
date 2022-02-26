@@ -20,18 +20,27 @@ export class MoulinettePreview extends FormApplication {
       dragDrop: [{dragSelector: "#previewImage"}],
       closeOnSubmit: false,
       submitOnClose: false,
+      resizable: true
     });
   }
 
   async getData() {
     const filename = this.asset.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
 
+    let scenePacker = false
+
     // detect if scene packer
     if("tokens" in this.asset.data) {
       this.asset.baseURL += "_thumb"
+      scenePacker = true
     }
 
-    return { asset: this.asset, pack: this.pack, filename: filename }
+    // detect if video
+    if(this.asset.data.img.endsWith(".webm")) {
+      this.asset.isVideo = true
+    }
+
+    return { asset: this.asset, pack: this.pack, filename: filename, isScenePacker: scenePacker }
   }
 
   activateListeners(html) {
@@ -123,7 +132,7 @@ export class MoulinettePreview extends FormApplication {
           try {
             let sceneID = this.asset.data.type === 'scene' ? this.asset.filename : ''
             let actorID = this.asset.data.type === 'actor' ? this.asset.filename : ''
-            const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID, actorID})
+            const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID: sceneID, actorID: actorID})
             if (moulinetteImporter) {
               this.close()
               return moulinetteImporter.render(true)
