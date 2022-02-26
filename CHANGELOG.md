@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.2] - 2021-02-13
+## [3.2.3] - 2021-02-26
 ### Fixed
 - 3.2.1 : check that Library Scene Packer is enabled/installed
 - 3.2.2 : fix broken previews for newest packs from BeneosBattlemaps
+- 3.2.3 : fixes for ScenePacker integration
 ### Changed
 - Scene Packer (better integration)
 - Japanese translations
