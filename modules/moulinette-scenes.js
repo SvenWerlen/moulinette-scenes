@@ -246,73 +246,79 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"), Math.round((idx / dir1.dirs.length)*100));
       
       if(debug) console.log(`Moulinette FileUtil | Root: processing publisher ${publisher}...`)
-      let dirPub = await FilePicker.browse(source, publisher, MoulinetteFileUtil.getOptions());
-      let moduleJson = dirPub.files.find(f => f.endsWith('module.json'));
-      if(!moduleJson) {
-        continue;
-      }
-      const response = await fetch(moduleJson).catch(function(e) {
-        if(debug) console.log(`Moulinette | Not able to fetch module JSON`, e)
-      });
-      const moduleJsonContent = await response.json();
-      const scenePacks = moduleJsonContent?.packs?.filter(p => p.entity === 'Scene');
-      if(scenePacks?.length > 0) {
-        let packs = [];
 
-        for(let scenePack of scenePacks) {
-          const packname= `${moduleJsonContent.name}.${scenePack.name}`;
-          // get matching compendium and add it's scenes
-          const scenes = await game.packs.get(packname)?.getDocuments();
-          if(!scenes) {
-            continue;
-          }
-
-          const pack = {
-            "isLocal": true,
-            "assets":[],
-            "deps":[],
-            "license":"\u00a9 " + moduleJsonContent.author,
-            "licenseUrl":moduleJsonContent.url,
-            "name":scenePack.label,
-            "path":publisher,
-            "sas":null,
-            "showCase":true,
-            "url":moduleJsonContent.url
-          }
-
-          for(let scene of scenes) {
-            if(scene.data.img) {
-              pack.assets.push(
-                  {
-                    "deps":[
-                      scene.data.img
-                    ],
-                    "drawings":scene.data.drawings.size > 0,
-                    "eDeps":{},
-                    "img":scene.data.img,
-                    "lights":scene.data.lights.size > 0,
-                    "name":scene.data.name,
-                    "journalId":scene.id,
-                    "path":packname,
-                    "sounds":scene.data.sounds.size > 0,
-                    "type":"scene",
-                    "walls":scene.data.walls.size > 0
-                    // don't save thumb - too large size
-                  }
-              );
-            }
-          }
-          packs.push(pack);
+      // resiliency against unexpected error
+      try {
+        let dirPub = await FilePicker.browse(source, publisher, MoulinetteFileUtil.getOptions());
+        let moduleJson = dirPub.files.find(f => f.endsWith('module.json'));
+        if(!moduleJson) {
+          continue;
         }
+        const response = await fetch(moduleJson).catch(function(e) {
+          if(debug) console.log(`Moulinette | Not able to fetch module JSON`, e)
+        });
+        const moduleJsonContent = await response.json();
+        const scenePacks = moduleJsonContent?.packs?.filter(p => p.entity === 'Scene');
+        if(scenePacks?.length > 0) {
+          let packs = [];
 
-        publishers.push({
-          publisher: moduleJsonContent.author ? moduleJsonContent.author : game.i18n.localize("mtte.unknown"),
-          website: moduleJsonContent.url ? moduleJsonContent.url : null,
-          packs
-        })
-        
-        idx++;
+          for(let scenePack of scenePacks) {
+            const packname= `${moduleJsonContent.name}.${scenePack.name}`;
+            // get matching compendium and add it's scenes
+            const scenes = await game.packs.get(packname)?.getDocuments();
+            if(!scenes) {
+              continue;
+            }
+
+            const pack = {
+              "isLocal": true,
+              "assets":[],
+              "deps":[],
+              "license":"\u00a9 " + moduleJsonContent.author,
+              "licenseUrl":moduleJsonContent.url,
+              "name":scenePack.label,
+              "path":publisher,
+              "sas":null,
+              "showCase":true,
+              "url":moduleJsonContent.url
+            }
+
+            for(let scene of scenes) {
+              if(scene.data.img) {
+                pack.assets.push(
+                    {
+                      "deps":[
+                        scene.data.img
+                      ],
+                      "drawings":scene.data.drawings.size > 0,
+                      "eDeps":{},
+                      "img":scene.data.img,
+                      "lights":scene.data.lights.size > 0,
+                      "name":scene.data.name,
+                      "journalId":scene.id,
+                      "path":packname,
+                      "sounds":scene.data.sounds.size > 0,
+                      "type":"scene",
+                      "walls":scene.data.walls.size > 0
+                      // don't save thumb - too large size
+                    }
+                );
+              }
+            }
+            packs.push(pack);
+          }
+
+          publishers.push({
+            publisher: moduleJsonContent.author ? moduleJsonContent.author : game.i18n.localize("mtte.unknown"),
+            website: moduleJsonContent.url ? moduleJsonContent.url : null,
+            packs
+          })
+        }
       }
+      catch (e) {
+        console.warn(`Moulinette Scenes | Unexpected error from module ${publisher}.`, e)
+      }
+      idx++;
     }
     SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"),100);  
     
