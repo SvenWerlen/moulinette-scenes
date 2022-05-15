@@ -30,11 +30,12 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     }
     
     const user = await game.moulinette.applications.Moulinette.getUser()
+    const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/scenes/custom/index.json"])
+      baseURL + "moulinette/images/custom/index.json",
+      baseURL + "moulinette/scenes/custom/index.json"])
 
     // remove non-scene
     this.assets = index.assets.filter(a => {
@@ -62,7 +63,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
    */
   async generateAsset(r, idx) {
     const pack = this.assetsPacks[r.pack]
-    const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const URL = pack.isLocal || pack.isRemote ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     
     // sas (Shared access signature) for accessing remote files (Azure)
     r.sas = pack.sas ? "?" + pack.sas : ""
