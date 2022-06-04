@@ -24,6 +24,23 @@ export class MoulinettePreview extends FormApplication {
     });
   }
 
+  async hasOriginalThumb() {
+    // videos and local images won't have original thumbs on Moulinette Cloud
+    if(this.asset.isVideo || this.pack.isLocal) return false
+    try {
+      const test = await jQuery.ajax({
+        url: this.asset.baseURL + "_thumb_orig.webp" + this.asset.sas,
+        type: 'HEAD',
+        cache: false
+      });
+      return true
+    } catch (error) {
+      // error means that no original thumb exists
+      console.log("MoulinettePreview | ↥↥↥ Just ignore this error. Moulinette is only checking if a thumb was provided by the creator ↥↥↥")
+      return false
+    }
+  };
+
   async getData() {
     const filename = this.asset.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
 
@@ -40,7 +57,8 @@ export class MoulinettePreview extends FormApplication {
       this.asset.isVideo = true
     }
 
-    return { asset: this.asset, pack: this.pack, filename: filename, isScenePacker: scenePacker }
+    const previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
+    return { asset: this.asset, previewImage: previewImage, pack: this.pack, filename: filename, isScenePacker: scenePacker }
   }
 
   activateListeners(html) {
@@ -95,14 +113,14 @@ export class MoulinettePreview extends FormApplication {
       moulinetteFolder = moulinetteFolder[0]
     }
     // publisher level
-    let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
+    let publisherFolder = moulinetteFolder.children ? moulinetteFolder.children.filter( c => c.name == publisher ) : []
     if( publisherFolder.length == 0 ) {
       publisherFolder = await Folder.create({name: publisher, type: "Scene", parent: moulinetteFolder.id })
     } else {
       publisherFolder = publisherFolder[0]
     }
     // pack level
-    let packFolder = publisherFolder.children.filter( c => c.name == pack )
+    let packFolder = publisherFolder.children ? publisherFolder.children.filter( c => c.name == pack ) : []
     if( packFolder.length == 0 ) {
       packFolder = await Folder.create({name: pack, type: "Scene", parent: publisherFolder.id })
     } else {
@@ -116,6 +134,39 @@ export class MoulinettePreview extends FormApplication {
    ************************************/
   async _onClick(event) {
     event.preventDefault();
+
+    // Clipboard => download background image and put into clipboard
+    /* /!\ Development not ready
+    if(event.currentTarget.classList.contains("clipboard")) {
+
+      // not supported for Scene Packer
+      if("tokens" in this.asset.data) {
+        return ui.notifications.error(game.i18n.localize("mtte.errorScenepackerClipboard"))
+      }
+      // real scene
+      else if(this.asset.filename.endsWith(".json")) {
+        // retrieve scene JSON
+        const response = await fetch(`${this.pack.path}/${this.asset.filename}${this.asset.sas}`).catch(function(e) {
+          console.log(`Moulinette | Not able to fetch scene JSON`, e)
+        });
+        if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
+        const json = await response.json()
+
+        console.log(this.asset, this.pack)
+
+        //const path = game.moulinette.applications.MoulinetteFileUtil.getMoulinetteBasePath("cloud", pack.publisher, pack.name)
+        //asset = { data: { deps: [ json.img.replace("#DEP#", "") ], eDeps: {} }, sas: asset.sas }
+        //await game.moulinette.applications.MoulinetteFileUtil.downloadDependencies(asset.data.deps, pack.path, asset.sas, path)
+
+        console.log(json.img)
+        return
+      }
+      // plan image
+      else {
+        return
+      }
+    }
+    */
 
     ui.scenes.activate() // give focus to scenes
 
