@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.1] - 2022-06-06
 ### Fixed
-- 4.5.1: #40 Non-host GMs can't use Moulinette for games hosted on The Forge
+- 3.3.1: #40 Non-host GMs can't use Moulinette for games hosted on The Forge
 
 ## [3.3.0] - 2022-05-15
 ### Changed
