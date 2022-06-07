@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2022-06-06
+### Fixed
+- 4.5.1: #40 Non-host GMs can't use Moulinette for games hosted on The Forge
+
 ## [3.3.0] - 2022-05-15
 ### Changed
 - Manage sources (for indexing process)
