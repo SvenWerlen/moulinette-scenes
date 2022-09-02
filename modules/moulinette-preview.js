@@ -205,6 +205,7 @@ export class MoulinettePreview extends FormApplication {
       const img = document.getElementById("previewImage")
       this.close()
       ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
+      const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
 
       // Moulinette Cloud scenes
       if(this.asset.filename.endsWith(".json")) {
@@ -232,7 +233,7 @@ export class MoulinettePreview extends FormApplication {
             "navigation": false,
             "width": img.naturalWidth,
             "height": img.naturalHeight,
-            "img": `${this.pack.path}/${this.asset.filename}`
+            "img": `${baseURL}${this.pack.path}/${this.asset.filename}`
           })
         } else {
           console.error("Moulinette Preview | HTML Image not found")

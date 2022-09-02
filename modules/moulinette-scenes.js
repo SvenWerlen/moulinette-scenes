@@ -276,11 +276,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
               "assets":[],
               "deps":[],
               "license":"\u00a9 " + moduleJsonContent.author,
-              "licenseUrl":moduleJsonContent.url,
-              "name":scenePack.label,
-              "path":publisher,
-              "sas":null,
-              "showCase":true,
+              "licenseUrl": moduleJsonContent.url,
+              "name": scenePack.label,
+              "path": publisher,
+              "sas": null,
               "url":moduleJsonContent.url
             }
 
