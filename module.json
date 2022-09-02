@@ -1,37 +1,53 @@
 {
-  "name": "moulinette-scenes",
   "title": "Moulinette Scenes (module)",
   "description": "This module for Moulinette adds capabilities for downloading scenes from the community.",
-  "version": "3.3.3",
-  "author": "Sven Werlen",
-  "esmodules": ["moulinette-scenes.js"],
-  "styles": ["moulinette-scenes.css"],
+  "version": "10.0.0",
+  "esmodules": [
+    "moulinette-scenes.js"
+  ],
+  "styles": [
+    "moulinette-scenes.css"
+  ],
   "languages": [
     {
       "lang": "en",
       "name": "English",
-      "path": "lang/en.json"
+      "path": "lang/en.json",
+      "flags": {}
     },
     {
       "lang": "fr",
       "name": "French",
-      "path": "lang/fr.json"
+      "path": "lang/fr.json",
+      "flags": {}
     },
     {
       "lang": "ja",
       "name": "日本語",
-      "path": "lang/ja.json"
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "moulinette-core",
-      "type": "module"
+      "path": "lang/ja.json",
+      "flags": {}
     }
   ],
   "url": "https://github.com/SvenWerlen/moulinette-scenes",
   "download": "https://github.com/SvenWerlen/moulinette-scenes/archive/v-3.3.3.zip",
   "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-scenes/master/module.json",
-  "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "9"
+  "id": "moulinette-scenes",
+  "authors": [
+    {
+      "name": "Sven Werlen",
+      "flags": {}
+    }
+  ],
+  "relationships": {
+    "requires": [
+      {
+        "id": "moulinette-core",
+        "type": "module",
+        "compatibility": {}
+      }
+    ]
+  },
+  "compatibility": {
+    "minimum": "10"
+  }
 }

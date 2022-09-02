@@ -246,7 +246,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     for(const publisher of dir1.dirs) {
       SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"), Math.round((idx / dir1.dirs.length)*100));
       
-      if(debug) console.log(`Moulinette FileUtil | Root: processing publisher ${publisher}...`)
+      const publisherId = publisher.split("/").pop()
+      if(debug) console.log(`Moulinette FileUtil | Root: processing publisher ${publisherId}...`)
 
       // resiliency against unexpected error
       try {
@@ -259,15 +260,18 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
           if(debug) console.log(`Moulinette | Not able to fetch module JSON`, e)
         });
         const moduleJsonContent = await response.json();
-        const scenePacks = moduleJsonContent?.packs?.filter(p => p.entity === 'Scene');
+        const scenePacks = moduleJsonContent?.packs?.filter(p => p.entity === 'Scene' || p.type === 'Scene');
         if(scenePacks?.length > 0) {
           let packs = [];
 
           for(let scenePack of scenePacks) {
-            const packname= `${moduleJsonContent.name}.${scenePack.name}`;
+            const packname = `${publisherId}.${scenePack.name}`;
+
+            if(debug) console.log(`Moulinette | - ${packname}`)
             // get matching compendium and add it's scenes
             const scenes = await game.packs.get(packname)?.getDocuments();
             if(!scenes) {
+              console.warn(`Moulinette | Couldn't load scenes from ${packname} because module is not enabled!`)
               continue;
             }
 
