@@ -61,7 +61,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  async generateAsset(r, idx) {
+  async generateAsset(r, idx, folderIdx = null) {
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isLocal || pack.isRemote ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     
@@ -80,9 +80,13 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     if(pack.isLocal && game.packs.get(r.filename)?.size === 0) {
        await game.packs.get(r.filename)?.getDocuments();
     }
+
+    // add folder index if browsing by folder
+    const folderHTML = folderIdx ? `data-folder="${folderIdx}"` : ""
+
     // thumb is always same as image path but with _thumb appended, except for local scenes which have thumb stored in compendium .db
     let thumbSrc = pack.isLocal ? game.packs.get(r.filename)?.get(r.data.journalId).data.thumb : `${r.baseURL}_thumb.webp${r.sas}`;
-    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}"><img class="sc" width="200" height="200" src="${thumbSrc}"/>`
+    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img class="sc" width="200" height="200" src="${thumbSrc}"/>`
     html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
@@ -138,16 +142,18 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     }
     // view #2 (by folder)
     else if(viewMode == "list" || viewMode == "browse") {
-      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
+      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndexImproved(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
+      let folderIdx = 0
       for(const k of keys) {
+        folderIdx++;
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2 class="expand">${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2>${k} (${folders[k].length})</div>`)
         }
         for(const a of folders[k]) {
-          assets.push(await this.generateAsset(a, a.idx))
+          assets.push(await this.generateAsset(a, a.idx, folderIdx))
         }
       }
     }

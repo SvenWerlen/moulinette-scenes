@@ -5,12 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [10.0.0] - 2022-09-02
+### Fixed
+- 10.0.1: module packaging fix
+- 10.0.2: folder view doesn't list subfolders systematically
 ### Changed
 - Compatibility with V10
 - Major version based on FVTT
 
 ## [3.3.2] - 2022-08-20
 ### Fixed
+- 3.3.3: folder view doesn't list subfolders systematically
 - 3.3.2: Local scenes (indexed) are wrongly set as "showcase content"
 - 3.3.1: #40 Non-host GMs can't use Moulinette for games hosted on The Forge
 
