@@ -113,14 +113,14 @@ export class MoulinettePreview extends FormApplication {
       moulinetteFolder = moulinetteFolder[0]
     }
     // publisher level
-    let publisherFolder = moulinetteFolder.children ? moulinetteFolder.children.filter( c => c.name == publisher ) : []
+    let publisherFolder = moulinetteFolder.children ? moulinetteFolder.children.filter( c => c.folder.name == publisher ) : []
     if( publisherFolder.length == 0 ) {
       publisherFolder = await Folder.create({name: publisher, type: "Scene", parent: moulinetteFolder.id })
     } else {
       publisherFolder = publisherFolder[0]
     }
     // pack level
-    let packFolder = publisherFolder.children ? publisherFolder.children.filter( c => c.name == pack ) : []
+    let packFolder = publisherFolder.children ? publisherFolder.children.filter( c => c.folder.name == pack ) : []
     if( packFolder.length == 0 ) {
       packFolder = await Folder.create({name: pack, type: "Scene", parent: publisherFolder.id })
     } else {
