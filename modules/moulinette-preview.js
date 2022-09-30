@@ -11,7 +11,7 @@ export class MoulinettePreview extends FormApplication {
 
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
-      id: "moulinette-preview",
+      id: "moulinette-scenepreview",
       classes: ["mtte", "forge", "preview"],
       title: game.i18n.localize("mtte.preview"),
       template: "modules/moulinette-scenes/templates/preview.hbs",
