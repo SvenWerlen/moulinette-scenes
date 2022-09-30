@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [10.0.3] - 2022-09-02
+## [10.0.4] - 2022-09-02
 ### Fixed
 - 10.0.1: module packaging fix
 - 10.0.2: folder view doesn't list subfolders systematically
 - 10.0.3: V10 duplicate folders on scene import #51 (Thanks @Norskov!)
+- 10.0.4: Scene preview UI doesn't open when Moulinette Browser Extension (MBE) is active
 ### Changed
 - Compatibility with V10
 - Major version based on FVTT
