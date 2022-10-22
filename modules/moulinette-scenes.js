@@ -34,14 +34,15 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
-      baseURL + "moulinette/images/custom/index.json",
       baseURL + "moulinette/scenes/custom/index.json"])
 
     // remove non-scene
     this.assets = index.assets.filter(a => {
-      if(a.type == "scene" && a.filename.endsWith(".webp")) {
+      if(a.type == "scene") {
         // convert to scene type
-        a.data = { deps: [], eDeps: [], img: a.filename, name: a.filename }
+        if(!a.data) {
+          a.data = { deps: [], eDeps: [], img: a.filename, name: a.filename }
+        }
         return true;
       }
       else if(!a.data || a.data["type"] !== "scene") {
@@ -85,7 +86,13 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const folderHTML = folderIdx ? `data-folder="${folderIdx}"` : ""
 
     // thumb is always same as image path but with _thumb appended, except for local scenes which have thumb stored in compendium .db
-    let thumbSrc = pack.isLocal ? game.packs.get(r.filename)?.get(r.data.journalId).data.thumb : `${r.baseURL}_thumb.webp${r.sas}`;
+    let thumbSrc = ""
+    if(pack.isLocal && r.data.journalId) {
+      thumbSrc = game.packs.get(r.filename)?.get(r.data.journalId).thumb
+    } else {
+      thumbSrc = `${r.baseURL}_thumb.webp${r.sas}`
+    }
+
     let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img class="sc" width="200" height="200" src="${thumbSrc}"/>`
     html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
@@ -300,16 +307,16 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
                       "deps":[
                         scene.data.img
                       ],
-                      "drawings":scene.data.drawings.size > 0,
+                      "drawings": scene.data.drawings.size > 0,
                       "eDeps":{},
-                      "img":scene.data.img,
-                      "lights":scene.data.lights.size > 0,
-                      "name":scene.data.name,
-                      "journalId":scene.id,
-                      "path":packname,
-                      "sounds":scene.data.sounds.size > 0,
+                      "img": scene.data.img.substring(pack.path.length),
+                      "lights": scene.data.lights.size > 0,
+                      "name": scene.data.name,
+                      "journalId": scene.id,
+                      "path": packname,
+                      "sounds": scene.data.sounds.size > 0,
                       "type":"scene",
-                      "walls":scene.data.walls.size > 0
+                      "walls": scene.data.walls.size > 0
                       // don't save thumb - too large size
                     }
                 );
@@ -349,6 +356,29 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
         publishers = [].concat(publishers, await MoulinetteScenes.scanScenes("data", MoulinetteScenes.FOLDER_MODULES))
       }
 
+      // index images as scenes
+      ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
+      const EXT = ["jpg","jpeg","png","webp", "webm"]
+      const localScenes = await FileUtil.scanSourceAssets("scenes", EXT)
+      for(const sc of localScenes) {
+        for(const p of sc.packs) {
+          for(const a of p.assets) {
+            if(a.indexOf("_thumb") > 0) continue;
+            const imgPath = `${p.path}/${a}`
+            const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
+            const thumbFilename = thumbPath.split("/").pop()
+            console.log(thumbFilename)
+            const thumb = await ImageHelper.createThumbnail(imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
+            // convert to file
+            const res = await fetch(thumb.thumb);
+            const buf = await res.arrayBuffer();
+            const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
+            await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/"), true))
+          }
+        }
+      }
+      publishers.push(...localScenes)
+
       await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
       ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
       game.moulinette.cache.clear()
@@ -358,6 +388,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // ACTION - HELP / HOWTO
     else if(classList.contains("howto")) {
       new game.moulinette.applications.MoulinetteHelp("scenes").render(true)
+    }
+    // ACTION - CONFIGURE SOURCES
+    else if(classList.contains("configureSources")) {
+      (new game.moulinette.applications.MoulinetteSources(["scenes"])).render(true)
     }
   }
 }
