@@ -1,7 +1,7 @@
 {
   "title": "Moulinette Scenes (module)",
   "description": "This module for Moulinette adds capabilities for downloading scenes from the community.",
-  "version": "10.1.2",
+  "version": "10.2.0",
   "esmodules": [
     "moulinette-scenes.js"
   ],
@@ -29,7 +29,7 @@
     }
   ],
   "url": "https://github.com/SvenWerlen/moulinette-scenes",
-  "download": "https://github.com/SvenWerlen/moulinette-scenes/archive/v-10.1.2.zip",
+  "download": "https://github.com/SvenWerlen/moulinette-scenes/archive/v-10.2.0.zip",
   "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-scenes/master/module.json",
   "id": "moulinette-scenes",
   "authors": [
@@ -43,7 +43,9 @@
       {
         "id": "moulinette-core",
         "type": "module",
-        "compatibility": {}
+        "compatibility": {
+          "minimum": "10.2.0"
+        }
       }
     ]
   },

@@ -349,7 +349,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const FileUtil = game.moulinette.applications.MoulinetteFileUtil;
     if(classList.contains("indexScenes")) {
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
-      this.html.find(".indexScenes").prop("disabled", true);
+      game.moulinette.applications.Moulinette.inprogress(this.html.find(".indexScenes"))
       // index from Data / My Asset Library (The Forge)
       let publishers = await MoulinetteScenes.scanScenes(FileUtil.getSource(), MoulinetteScenes.FOLDER_MODULES);
       if(typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
