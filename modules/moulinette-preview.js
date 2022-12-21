@@ -109,7 +109,8 @@ export class MoulinettePreview extends FormApplication {
 
     // download image
     const destPath = FILEUTIL.getMoulinetteBasePath("scenes", this.pack.publisher, this.pack.name)
-    return await FILEUTIL.downloadDependencies([imageURL], this.pack.path, this.asset.sas, destPath)
+    const paths = await FILEUTIL.downloadDependencies([imageURL], this.pack.path, this.asset.sas, destPath)
+    return paths[0].path
   }
 
 
@@ -157,8 +158,7 @@ export class MoulinettePreview extends FormApplication {
       // download if remote
       const data = { asset: this.asset, pack: this.pack }
       if(this.pack.isRemote) {
-        const res = await this.downloadAsset(data)
-        data.img = res.path
+        data.img = await this.downloadAsset(data)
       } else {
         const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
         data.img = `${baseURL}${this.pack.path}/${this.asset.filename}`
