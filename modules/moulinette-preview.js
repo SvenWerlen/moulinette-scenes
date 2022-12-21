@@ -101,39 +101,24 @@ export class MoulinettePreview extends FormApplication {
   }
 
   /**
-   * Generates moulinette folders
+   * Download the asset received from event
    */
-  static async getOrCreateSceneFolder(publisher, pack) {
-    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" && f.type == "Scene" )
+  async downloadAsset() {
+    const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
+    const imageURL = this.asset.data.img
 
-    // main
-    if( moulinetteFolder.length == 0 ) {
-      moulinetteFolder = await Folder.create({name:"Moulinette", type:"Scene", parent: null})
-    } else {
-      moulinetteFolder = moulinetteFolder[0]
-    }
-    // publisher level
-    let publisherFolder = moulinetteFolder.children ? moulinetteFolder.children.filter( c => c.folder.name == publisher ) : []
-    if( publisherFolder.length == 0 ) {
-      publisherFolder = await Folder.create({name: publisher, type: "Scene", parent: moulinetteFolder.id })
-    } else {
-      publisherFolder = publisherFolder[0].folder
-    }
-    // pack level
-    let packFolder = publisherFolder.children ? publisherFolder.children.filter( c => c.folder.name == pack ) : []
-    if( packFolder.length == 0 ) {
-      packFolder = await Folder.create({name: pack, type: "Scene", parent: publisherFolder.id })
-    } else {
-      packFolder = packFolder[0].folder
-    }
-    return packFolder
+    // download image
+    const destPath = FILEUTIL.getMoulinetteBasePath("scenes", this.pack.publisher, this.pack.name)
+    return await FILEUTIL.downloadDependencies([imageURL], this.pack.path, this.asset.sas, destPath)
   }
+
 
   /*************************************
    * Main action
    ************************************/
   async _onClick(event) {
     event.preventDefault();
+      const source = event.currentTarget;
 
     // Clipboard => download background image and put into clipboard
     /* /!\ Development not ready
@@ -167,106 +152,125 @@ export class MoulinettePreview extends FormApplication {
       }
     }
     */
+    if(source.classList.contains("createArticle")) {
+      const img = document.getElementById("previewImage")
+      // download if remote
+      const data = { asset: this.asset, pack: this.pack }
+      if(this.pack.isRemote) {
+        const res = await this.downloadAsset(data)
+        data.img = res.path
+      } else {
+        const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+        data.img = `${baseURL}${this.pack.path}/${this.asset.filename}`
+      }
+      // create folder (where to store the journal article)
+      const folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "JournalEntry")
+      // generate journal
+      const name = data.img.split('/').pop()
+      const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder.id} )
+      return entry.sheet.render(true)
+    }
+    else if(source.classList.contains("importScene")) {
+      ui.scenes.activate() // give focus to scenes
 
-    ui.scenes.activate() // give focus to scenes
-
-    // special case to delegate to Scene Packer
-    if("tokens" in this.asset.data) {
-      if(typeof ScenePacker === 'object' && typeof ScenePacker.MoulinetteImporter === 'function') {
-        const baseURL = `/assets/${game.moulinette.user.id}/${this.pack.packId}`
-        const client = new game.moulinette.applications.MoulinetteClient()
-        const packInfo = await client.get(baseURL)
-        console.log(`Moulinette Preview | API for ScenePacker : ${baseURL}`)
-        console.log(`Moulinette Preview | Asset for ScenePacker`, this.asset)
-        console.log("Moulinette Preview | Result", packInfo)
-        if (packInfo.status === 200) {
-          try {
-            let sceneID = this.asset.data.type === 'scene' ? this.asset.filename : ''
-            let actorID = this.asset.data.type === 'actor' ? this.asset.filename : ''
-            const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID: sceneID, actorID: actorID})
-            if (moulinetteImporter) {
-              this.close()
-              return moulinetteImporter.render(true)
+      // special case to delegate to Scene Packer
+      if("tokens" in this.asset.data) {
+        if(typeof ScenePacker === 'object' && typeof ScenePacker.MoulinetteImporter === 'function') {
+          const baseURL = `/assets/${game.moulinette.user.id}/${this.pack.packId}`
+          const client = new game.moulinette.applications.MoulinetteClient()
+          const packInfo = await client.get(baseURL)
+          console.log(`Moulinette Preview | API for ScenePacker : ${baseURL}`)
+          console.log(`Moulinette Preview | Asset for ScenePacker`, this.asset)
+          console.log("Moulinette Preview | Result", packInfo)
+          if (packInfo.status === 200) {
+            try {
+              let sceneID = this.asset.data.type === 'scene' ? this.asset.filename : ''
+              let actorID = this.asset.data.type === 'actor' ? this.asset.filename : ''
+              const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID: sceneID, actorID: actorID})
+              if (moulinetteImporter) {
+                this.close()
+                return moulinetteImporter.render(true)
+              }
+            } catch(e) {
+              console.log(`Moulinette | Unhandled exception`, e)
+              ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
             }
-          } catch(e) {
-            console.log(`Moulinette | Unhandled exception`, e)
-            ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
+          }
+        } else {
+          console.error(`Moulinette | ${game.i18n.localize("mtte.errorScenepackerRequired")}. See: https://foundryvtt.com/packages/scene-packer`)
+          return ui.notifications.error(game.i18n.localize("mtte.errorScenepackerRequired"))
+        }
+      }
+
+      try {
+        let jsonAsText;
+
+        const img = document.getElementById("previewImage")
+        this.close()
+        ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
+        const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+
+        // Moulinette Cloud scenes
+        if(this.asset.filename.endsWith(".json")) {
+          // retrieve scene JSON
+          const response = await fetch(`${this.pack.path}/${this.asset.filename}${this.asset.sas}`).catch(function(e) {
+            console.log(`Moulinette | Not able to fetch scene JSON`, e)
+          });
+          if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
+
+          // download all dependencies
+          const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud")
+
+          // replace all DEPS
+          jsonAsText = await response.text()
+
+          for(let i = 0; i<paths.length; i++) {
+            jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
           }
         }
-      } else {
-        console.error(`Moulinette | ${game.i18n.localize("mtte.errorScenepackerRequired")}. See: https://foundryvtt.com/packages/scene-packer`)
-        return ui.notifications.error(game.i18n.localize("mtte.errorScenepackerRequired"))
-      }
-    }
-
-    try {
-      let jsonAsText;
-
-      const img = document.getElementById("previewImage")
-      this.close()
-      ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
-      const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-
-      // Moulinette Cloud scenes
-      if(this.asset.filename.endsWith(".json")) {
-        // retrieve scene JSON
-        const response = await fetch(`${this.pack.path}/${this.asset.filename}${this.asset.sas}`).catch(function(e) {
-          console.log(`Moulinette | Not able to fetch scene JSON`, e)
-        });
-        if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
-
-        // download all dependencies
-        const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud")
-
-        // replace all DEPS
-        jsonAsText = await response.text()
-
-        for(let i = 0; i<paths.length; i++) {
-          jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
+        // Simple images
+        else {
+          if(img) {
+            jsonAsText = JSON.stringify({
+              "name": game.moulinette.applications.Moulinette.prettyText(this.asset.filename.split("/").pop()),
+              "navigation": false,
+              "width": img.naturalWidth,
+              "height": img.naturalHeight,
+              "img": `${baseURL}${this.pack.path}/${this.asset.filename}`
+            })
+          } else {
+            console.error("Moulinette Preview | HTML Image not found")
+            return;
+          }
         }
-      }
-      // Simple images
-      else {
-        if(img) {
-          jsonAsText = JSON.stringify({
-            "name": game.moulinette.applications.Moulinette.prettyText(this.asset.filename.split("/").pop()),
-            "navigation": false,
-            "width": img.naturalWidth,
-            "height": img.naturalHeight,
-            "img": `${baseURL}${this.pack.path}/${this.asset.filename}`
-          })
-        } else {
-          console.error("Moulinette Preview | HTML Image not found")
-          return;
+
+        // adapt scene and create
+
+        // ensure compendium is loaded before accessing it
+        if(this.asset.data.journalId && game.packs.get(this.asset.filename).size === 0) {
+          await game.packs.get(this.asset.filename)?.getDocuments();
         }
+
+        const sceneData = this.asset.data.journalId ?
+            JSON.parse(JSON.stringify(game.packs.get(this.asset.filename).get(this.asset.data.journalId).data)) :
+            JSON.parse(jsonAsText);
+
+        // configure dimensions if no width/height set
+        if( !("width" in sceneData)) {
+          sceneData.width = img.naturalWidth
+          sceneData.height = img.naturalHeight
+        }
+
+        sceneData.folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "Scene")
+        let newScene = await Scene.create(sceneData);
+        let tData = await newScene.createThumbnail()
+        await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
+
+        ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
+      } catch(e) {
+        console.log(`Moulinette | Unhandled exception`, e)
+        ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
       }
-
-      // adapt scene and create
-
-      // ensure compendium is loaded before accessing it
-      if(this.asset.data.journalId && game.packs.get(this.asset.filename).size === 0) {
-        await game.packs.get(this.asset.filename)?.getDocuments();
-      }
-
-      const sceneData = this.asset.data.journalId ?
-          JSON.parse(JSON.stringify(game.packs.get(this.asset.filename).get(this.asset.data.journalId).data)) :
-          JSON.parse(jsonAsText);
-
-      // configure dimensions if no width/height set
-      if( !("width" in sceneData)) {
-        sceneData.width = img.naturalWidth
-        sceneData.height = img.naturalHeight
-      }
-
-      sceneData.folder = await MoulinettePreview.getOrCreateSceneFolder(this.pack.publisher, this.pack.name)
-      let newScene = await Scene.create(sceneData);
-      let tData = await newScene.createThumbnail()
-      await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
-
-      ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
-    } catch(e) {
-      console.log(`Moulinette | Unhandled exception`, e)
-      ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
     }
   }
 }
