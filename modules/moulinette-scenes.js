@@ -18,7 +18,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.assetsPacks = null
     this.searchResults = null
     this.matchesCloud = null
-    this.pack = null
   }
   
   /**
@@ -117,25 +116,30 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   /**
    * Implements getAssetList
    */
-  async getAssetList(searchTerms, pack, publisher) {
+  async getAssetList(searchTerms, packs, publisher) {
     let assets = []
-    this.pack = pack
-    
+    const packList = packs == "-1" ? null : ('' + packs).split(",").map(Number);
+
     // pack must be selected or terms provided
-    if((!pack || pack < 0) && (!publisher || publisher.length == 0) && (!searchTerms || searchTerms.length == 0)) {
+    if(!packList && (!publisher || publisher.length == 0) && (!searchTerms || searchTerms.length == 0)) {
       return []
     }
     
+    const wholeWord = game.settings.get("moulinette", "wholeWordSearch")
     const searchTermsList = searchTerms.split(" ")
     // filter list according to search terms and selected pack
     this.searchResults = this.assets.filter( t => {
       // pack doesn't match selection
-      if( pack >= 0 && t.pack != pack ) return false
+      if( packList && !packList.includes(t.pack) ) return false
       // publisher doesn't match selection
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
       // check if text match
       for( const f of searchTermsList ) {
-        if( t.data.name.toLowerCase().indexOf(f) < 0 && t.filename.toLowerCase().indexOf(f) < 0 ) return false
+        const textToSearch = game.moulinette.applications.Moulinette.cleanForSearch(t.data.name + " " + t.filename)
+        const regex = wholeWord ? new RegExp("\\b"+ f.toLowerCase() +"\\b") : new RegExp(f.toLowerCase())
+        if(!regex.test(textToSearch)) {
+          return false;
+        }
       }
       return true;
     })
@@ -157,10 +161,11 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       let folderIdx = 0
       for(const k of keys) {
         folderIdx++;
+        const breadcrumb = game.moulinette.applications.Moulinette.prettyBreadcrumb(k)
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2 class="expand">${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2 class="expand">${breadcrumb} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2>${k} (${folders[k].length})</div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2>${breadcrumb} (${folders[k].length})</div>`)
         }
         for(const a of folders[k]) {
           assets.push(await this.generateAsset(a, a.idx, folderIdx))
