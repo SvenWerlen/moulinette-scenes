@@ -224,7 +224,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
    * Footer: Dropmode
    */
   async getFooter() {
-    return `<div class="showcase"></div>`
+    return ""
   }
   
   /**
