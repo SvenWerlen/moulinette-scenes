@@ -13,6 +13,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.scenes = []
   }
   
+  supportsWholeWordSearch() { return true }
+
   clearCache() {
     this.assets = null
     this.assetsPacks = null
@@ -375,7 +377,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
             const imgPath = `${p.path}/${a}`
             const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
             const thumbFilename = thumbPath.split("/").pop()
-            console.log(thumbFilename)
             const thumb = await ImageHelper.createThumbnail(imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
             // convert to file
             const res = await fetch(thumb.thumb);
