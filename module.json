@@ -30,7 +30,7 @@
   ],
   "url": "https://github.com/SvenWerlen/moulinette-scenes",
   "download": "https://github.com/SvenWerlen/moulinette-scenes/archive/v-10.2.0.zip",
-  "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-scenes/master/module.json",
+  "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-scenes/Feature/NewInterface/module.json",
   "id": "moulinette-scenes",
   "authors": [
     {
@@ -44,7 +44,7 @@
         "id": "moulinette-core",
         "type": "module",
         "compatibility": {
-          "minimum": "10.2.0"
+          "minimum": "10.3.0"
         }
       }
     ]
