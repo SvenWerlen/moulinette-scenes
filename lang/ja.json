@@ -5,6 +5,10 @@
   "mtte.authorURLToolTip": "画像が存在している作者のページのURLです。Moulinetteは著作権を尊重していますので、対外的に利用するときは作者に連絡を取ることをお勧めしています。",
   "mtte.availableAssets": "検索したアセットの一覧はMoulinette Cloudで閲覧できます。",
   "mtte.availableresult": "検索結果",
+  "mtte.clipboardImage": "クリップボード",
+  "mtte.clipboardImageToolTip": "パスをクリップボードにコピーし、任意の場所にペーストできるようなります。",
+  "mtte.createArticle": "資料作成",
+  "mtte.createArticleToolTip": "画像をベースに資料を作成します。",
   "mtte.creatorMoulinetteWebsite": "Moulinette Cloudのクリエイター達",
   "mtte.creatorWebsite": "クリエイターのウェブサイト",
   "mtte.discordId": "あなたのDiscord識別子",
@@ -50,7 +54,6 @@
   "mtte.indexingInProgress": "インデックス中です……しばらくお待ち下さい。",
   "mtte.indexingMoulinette": "Moulinette インデックス",
   "mtte.learnMore": "よりMoulinetteの詳細や支援方法を御覧ください。",
-  "mtte.license": "ライセンス",
   "mtte.preview": "シーンのプレビュー",
   "mtte.requiredTiers": "必要な支援レベル",
   "mtte.sceneDesc": "シーン説明",
@@ -71,6 +74,5 @@
   "mtte.showCaseAssets": "{count}個の一致する素材が見つかりました。クリックでプレビューできます。",
   "mtte.subscribe": "支援する",
   "mtte.unknown": "不明",
-  "mtte.unknownLicense": "不明（ローカル）",
   "mtte.visitCloud": "Moulinette Cloud"
 }

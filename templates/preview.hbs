@@ -38,6 +38,10 @@
         {{#unless asset.isVideo}}
         <button class="createArticle" title="{{localize "mtte.createArticleToolTip"}}"><i class="fas fa-book-open"></i> {{localize "mtte.createArticle"}}</button>
         {{/unless}}
+        <div class="option">
+          <input type="checkbox" id="forceOverwrite" name="force" value="Overwrite" title="{{localize "mtte.forceOverwriteTooltip"}}">
+          <label for="forceOverwrite" title="{{localize "mtte.forceOverwriteTooltip"}}"> {{localize "mtte.forceOverwrite"}}</label>
+        </div>
       </div>
     </footer>
   </div>

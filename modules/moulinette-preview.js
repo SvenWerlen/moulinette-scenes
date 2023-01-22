@@ -15,8 +15,8 @@ export class MoulinettePreview extends FormApplication {
       classes: ["mtte", "forge", "preview"],
       title: game.i18n.localize("mtte.preview"),
       template: "modules/moulinette-scenes/templates/preview.hbs",
-      width: 420,
-      height: 620,
+      width: 640,
+      height: 800,
       dragDrop: [{dragSelector: "#previewImage"}],
       closeOnSubmit: false,
       submitOnClose: false,
@@ -65,6 +65,7 @@ export class MoulinettePreview extends FormApplication {
     super.activateListeners(html);
     this.bringToTop()
     html.find("button").click(this._onClick.bind(this))
+    this.html = html
   }
 
   _onDragStart(event) {
@@ -107,9 +108,9 @@ export class MoulinettePreview extends FormApplication {
     const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
     const imageURL = this.asset.data.img
 
-    // download image
+    // download image (always force because path is required)
     const destPath = FILEUTIL.getMoulinetteBasePath("scenes", this.pack.publisher, this.pack.name)
-    const paths = await FILEUTIL.downloadDependencies([imageURL], this.pack.path, this.asset.sas, destPath)
+    const paths = await FILEUTIL.downloadDependencies([imageURL], this.pack.path, this.asset.sas, destPath, true)
     return paths[0].path
   }
 
@@ -120,6 +121,8 @@ export class MoulinettePreview extends FormApplication {
   async _onClick(event) {
     event.preventDefault();
       const source = event.currentTarget;
+
+    const overwrite = this.html.find("#forceOverwrite").prop('checked')
 
     // Clipboard => download background image and put into clipboard
     /* /!\ Development not ready
@@ -158,7 +161,7 @@ export class MoulinettePreview extends FormApplication {
       // download if remote
       const data = { asset: this.asset, pack: this.pack }
       if(this.pack.isRemote) {
-        data.img = await this.downloadAsset(data)
+        data.img = await this.downloadAsset()
       } else {
         const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
         data.img = `${baseURL}${this.pack.path}/${this.asset.filename}`
@@ -186,7 +189,7 @@ export class MoulinettePreview extends FormApplication {
             try {
               let sceneID = this.asset.data.type === 'scene' ? this.asset.filename : ''
               let actorID = this.asset.data.type === 'actor' ? this.asset.filename : ''
-              const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID: sceneID, actorID: actorID})
+              const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, sceneID: sceneID, actorID: actorID, overwrite: overwrite})
               if (moulinetteImporter) {
                 this.close()
                 return moulinetteImporter.render(true)
@@ -219,7 +222,7 @@ export class MoulinettePreview extends FormApplication {
           if(!response) return ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error');
 
           // download all dependencies
-          const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud")
+          const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(this.asset, this.pack, "cloud", overwrite)
 
           // replace all DEPS
           jsonAsText = await response.text()
@@ -267,6 +270,9 @@ export class MoulinettePreview extends FormApplication {
         await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
 
         ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
+        if(overwrite) {
+          ui.notifications.warn(game.i18n.localize("mtte.forceOverwriteNotification"), {permanent: true})
+        }
       } catch(e) {
         console.log(`Moulinette | Unhandled exception`, e)
         ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
