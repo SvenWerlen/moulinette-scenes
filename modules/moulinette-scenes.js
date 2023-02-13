@@ -1,5 +1,4 @@
 import { MoulinettePreview } from "./moulinette-preview.js"
-import { MoulinetteAvailableSceneAssets } from "./moulinette-available.js"
 
 /**
  * Forge Module for scenes
@@ -176,8 +175,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     }
 
     // retrieve available assets that the user doesn't have access to
-    this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "scenes", this.assetsPacks)
-  
+    //this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "scenes", this.assetsPacks)
+    this.matchesCloudTerms = searchTerms
+    this.matchesCloudCount = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatchesMoulinetteCloud(searchTerms, "maps", true)
+
     return assets
   }
 
@@ -200,16 +201,15 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       $(el.currentTarget).find(".text").hide()
     });
 
+    
+
     // display/hide showCase
     const showCase = this.html.find(".showcase")
-    if(this.matchesCloud && this.matchesCloud.length > 0) {
+    if(this.matchesCloudCount && this.matchesCloudCount["count"] > 0) {
       // display/hide additional content
-      let count = 0
-      this.matchesCloud.forEach( m => count += m.matches.length )
-      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: count}))
+      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: this.matchesCloudCount["count"]}))
       showCase.addClass("clickable")
-      const matches = this.matchesCloud
-      showCase.click(ev => new MoulinetteAvailableSceneAssets(duplicate(matches)).render(true))
+      showCase.click(ev => new game.moulinette.applications.MoulinetteAvailableAssets(this.matchesCloudTerms, "maps", 200).render(true))
       showCase.show()
     }
     else {
