@@ -208,8 +208,8 @@ export class MoulinettePreview extends FormApplication {
       }
 
       // support V10 back to V9
-      if("background" in jsonAsText) {
-        jsonAsText["img"] = jsonAsText["background"]["src"]
+      if("background" in sceneData) {
+        sceneData["img"] = sceneData["background"]["src"]
       }
 
       sceneData.folder = await MoulinettePreview.getOrCreateSceneFolder(this.pack.publisher, this.pack.name)
