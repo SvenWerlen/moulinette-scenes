@@ -110,6 +110,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // HD/4K
     if(basePath.indexOf("4K_") > 0) html += `<div class="info">4K</i></div>`
     else if(basePath.indexOf("HD_") > 0) html += `<div class="info">HD</i></div>`
+    // Grid
+    if(basePath.toLowerCase().indexOf("grid") > 0 && basePath.toLowerCase().indexOf("ungrid") < 0 && basePath.toLowerCase().indexOf("gridless") < 0) {
+      html += `<div class="info"><i class="fas fa-border-all"></i></i></div>`
+    }
     
     return html + "</div></div>"
   }
