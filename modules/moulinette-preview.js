@@ -207,6 +207,11 @@ export class MoulinettePreview extends FormApplication {
         sceneData.height = img.naturalHeight
       }
 
+      // support V10 back to V9
+      if("background" in jsonAsText) {
+        jsonAsText["img"] = jsonAsText["background"]["src"]
+      }
+
       sceneData.folder = await MoulinettePreview.getOrCreateSceneFolder(this.pack.publisher, this.pack.name)
       let newScene = await Scene.create(sceneData);
       let tData = await newScene.createThumbnail()
