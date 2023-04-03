@@ -57,6 +57,11 @@ export class MoulinettePreview extends FormApplication {
       this.asset.isVideo = true
     }
 
+    // detect if Baileywiki
+    if(this.pack.publisher == "Baileywiki") {
+      this.asset.baseURL += "_thumb"
+    }
+
     const previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
     return { asset: this.asset, previewImage: previewImage, pack: this.pack, filename: filename, isScenePacker: scenePacker }
   }
