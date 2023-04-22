@@ -381,8 +381,11 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
           const baseURL = await FileUtil.getBaseURL(p.source)
           for(const a of p.assets) {
             if(a.indexOf("_thumb") > 0) continue;
-            // remove s3 full URL from image path (for S3)
-            const imgPath = baseURL.length > 0 && p.path.startsWith(baseURL) ? `${p.path.substring(baseURL.length)}/${a}` : `${p.path}/${a}` 
+            let imgPath = p.path.length > 0 ? `${p.path}/${a}` : a
+            // remove s3/forge full URL from image path (for S3)
+            if(baseURL.length > 0 && imgPath.startsWith(baseURL)) {
+              imgPath = imgPath.substring(baseURL.length)
+            }
             const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
             const thumbFilename = thumbPath.split("/").pop()
             const thumb = await ImageHelper.createThumbnail(baseURL + imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
