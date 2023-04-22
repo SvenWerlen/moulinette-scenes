@@ -30,11 +30,12 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     }
     
     const user = await game.moulinette.applications.Moulinette.getUser()
+    const worldId = game.world.id
     const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
-      baseURL + "moulinette/scenes/custom/index.json"])
+      baseURL + `moulinette/scenes/custom/index-${worldId}.json`])
 
     // remove non-scene
     this.assets = index.assets.filter(a => {
@@ -358,6 +359,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
 
   async onAction(classList) {
     const FileUtil = game.moulinette.applications.MoulinetteFileUtil;
+    const indexFileJSON = `index-${game.world.id}.json`
     if(classList.contains("indexScenes")) {
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       game.moulinette.applications.Moulinette.inprogress(this.html.find(".indexScenes"))
@@ -376,23 +378,25 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       const localScenes = await FileUtil.scanSourceAssets("scenes", EXT)
       for(const sc of localScenes) {
         for(const p of sc.packs) {
+          const baseURL = await FileUtil.getBaseURL(p.source)
           for(const a of p.assets) {
             if(a.indexOf("_thumb") > 0) continue;
-            const imgPath = `${p.path}/${a}`
+            // remove s3 full URL from image path (for S3)
+            const imgPath = baseURL.length > 0 && p.path.startsWith(baseURL) ? `${p.path.substring(baseURL.length)}/${a}` : `${p.path}/${a}` 
             const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
             const thumbFilename = thumbPath.split("/").pop()
-            const thumb = await ImageHelper.createThumbnail(imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
+            const thumb = await ImageHelper.createThumbnail(baseURL + imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
             // convert to file
             const res = await fetch(thumb.thumb);
             const buf = await res.arrayBuffer();
             const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
-            await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/"), true))
+            await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/")), true, p.source)
           }
         }
       }
       publishers.push(...localScenes)
 
-      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
+      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], indexFileJSON, { type: "application/json", lastModified: new Date() }), indexFileJSON, MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
       ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
       game.moulinette.cache.clear()
       this.clearCache()

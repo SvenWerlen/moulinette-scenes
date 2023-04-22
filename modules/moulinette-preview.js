@@ -168,8 +168,7 @@ export class MoulinettePreview extends FormApplication {
       if(this.pack.isRemote) {
         data.img = await this.downloadAsset()
       } else {
-        const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-        data.img = `${baseURL}${this.pack.path}/${this.asset.filename}`
+        data.img = `${this.pack.path}/${this.asset.filename}`
       }
       // create folder (where to store the journal article)
       const folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "JournalEntry")
@@ -216,7 +215,6 @@ export class MoulinettePreview extends FormApplication {
         const img = document.getElementById("previewImage")
         this.close()
         ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
-        const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
 
         // Moulinette Cloud scenes
         if(this.asset.filename.endsWith(".json")) {
@@ -244,7 +242,7 @@ export class MoulinettePreview extends FormApplication {
               "navigation": false,
               "width": img.naturalWidth,
               "height": img.naturalHeight,
-              "img": `${baseURL}${this.pack.path}/${this.asset.filename}`
+              "img": `${this.pack.path}/${this.asset.filename}`
             })
           } else {
             console.error("Moulinette Preview | HTML Image not found")
