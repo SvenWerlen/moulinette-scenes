@@ -85,6 +85,7 @@
   color: #000;
   font-size: large;
   display: none;
+  text-transform: capitalize;
 }
 
 .mtte .progressBlock {

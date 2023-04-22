@@ -75,9 +75,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // - Other cases : basePath based on JSON location
     const basePath = "tokens" in r.data ? r.data.img.substring(0, r.data.img.lastIndexOf('.')) : r.filename.substring(0, r.filename.lastIndexOf('.'))
     r.baseURL = URL.length > 0 || pack.path.length > 0 ? `${URL}${pack.path}/${basePath}` : basePath
+    const fallBackURL = URL.length > 0 || pack.path.length > 0 ? `${URL}${pack.path}/${r.filename}` : r.filename
     
-    const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
-    const displayName = r.data.name;
+    const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ")
+    const displayName = filename.substring(0, filename.lastIndexOf("."))
     // ensure compendium is loaded before accessing it
     if(pack.isLocal && game.packs.get(r.filename)?.size === 0) {
        await game.packs.get(r.filename)?.getDocuments();
@@ -94,10 +95,14 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
         thumbSrc = game.packs.get(r.filename)?.get(r.data.journalId).thumb
       }
     } else {
-      thumbSrc = `${r.baseURL}_thumb.webp${r.sas}`
+      if(game.settings.get("moulinette-scenes", "generateThumbnails")) {
+        thumbSrc = `${r.baseURL}_thumb.webp${r.sas}`
+      } else {
+        thumbSrc = fallBackURL
+      }
     }
 
-    let html = `<div class="scene" title="${r.data.name}\n(${filename})" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img class="sc" width="200" height="200" src="${thumbSrc}"/>`
+    let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img class="sc" width="200" height="200" src="${thumbSrc}" data-fallback="${fallBackURL}"/>`
     html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`
@@ -206,8 +211,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       $(el.currentTarget).find(".text").hide()
     });
 
-    
-
     // display/hide showCase
     const showCase = this.html.find(".showcase")
     if(this.matchesCloudCount && this.matchesCloudCount["count"] > 0) {
@@ -222,6 +225,17 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       showCase.removeClass("clickable")
       showCase.hide()
     }
+
+    // fallback image
+    this.html.find(".scene img").on('error', ev => {
+      ev.preventDefault();
+      const imObj = $(ev.currentTarget)
+      const fallbackURL = imObj.data('fallback')
+      if(fallbackURL) {
+        imObj.data('fallback', "") // avoid infinite fallback
+        imObj.attr('src', fallbackURL)
+      }
+    });
   }
   
 
@@ -376,30 +390,41 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       const EXT = ["jpg","jpeg","png","webp", "webm"]
       const localScenes = await FileUtil.scanSourceAssets("scenes", EXT)
-      for(const sc of localScenes) {
-        for(const p of sc.packs) {
-          const baseURL = await FileUtil.getBaseURL(p.source)
-          for(const a of p.assets) {
-            if(a.indexOf("_thumb") > 0) continue;
-            let imgPath = p.path.length > 0 ? `${p.path}/${a}` : a
-            // remove s3/forge full URL from image path (for S3)
-            if(baseURL.length > 0 && imgPath.startsWith(baseURL)) {
-              imgPath = imgPath.substring(baseURL.length)
-            }
-            const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
-            const thumbFilename = thumbPath.split("/").pop()
-            try {
-              const thumb = await ImageHelper.createThumbnail(baseURL + imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
-              // convert to file
-              const res = await fetch(thumb.thumb);
-              const buf = await res.arrayBuffer();
-              const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
-              await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/")), true, p.source)
-            } catch (error) {
-              console.warn(`Moulinette Scenes | Failed to create thumbnail for ${imgPath}.`, error);
+      if(game.settings.get("moulinette-scenes", "generateThumbnails")) {
+        for(const sc of localScenes) {
+          for(const p of sc.packs) {
+            const baseURL = await FileUtil.getBaseURL(p.source)
+            for(const a of p.assets) {
+              if(a.indexOf("_thumb") > 0) continue;
+              let imgPath = p.path.length > 0 ? `${p.path}/${a}` : a
+              // remove s3/forge full URL from image path (for S3)
+              if(baseURL.length > 0 && imgPath.startsWith(baseURL)) {
+                imgPath = imgPath.substring(baseURL.length)
+              }
+              const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
+              const thumbFilename = thumbPath.split("/").pop()
+              try {
+                console.log(`Moulinette Scenes | Creating thumbnail for ${imgPath}`)
+                const headData = await fetch(baseURL + imgPath, {method: 'HEAD'})
+                const fileSize = headData.headers.get("content-length")
+                if(fileSize > FileUtil.MAX_THUMB_FILESIZE) {
+                  console.warn(`Moulinette Scenes | File too large (${fileSize}). Thumbnail generation skipped.`)
+                  continue;
+                }
+                const thumb = await ImageHelper.createThumbnail(baseURL + imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
+                // convert to file
+                const res = await fetch(thumb.thumb);
+                const buf = await res.arrayBuffer();
+                const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
+                await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/")), true, p.source)
+              } catch (error) {
+                console.warn(`Moulinette Scenes | Failed to create thumbnail for ${imgPath}.`, error);
+              }
             }
           }
         }
+      } else {
+        console.warn("Moulinette Scenes | Thumbnails generation skipped!");
       }
       publishers.push(...localScenes)
 

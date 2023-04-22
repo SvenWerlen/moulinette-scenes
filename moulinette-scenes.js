@@ -5,6 +5,16 @@ import { MoulinetteLocalExport } from "./modules/moulinette-localexport.js"
 
 Hooks.once("init", async function () {
   console.log("Moulinette Scenes | Init")
+
+  game.settings.register("moulinette-scenes", "generateThumbnails", {
+    name: game.i18n.localize("mtte.configGenerateThumbnails"),
+    hint: game.i18n.localize("mtte.configGenerateThumbnailsHint"),
+    scope: "world",
+    config: true,
+    default: true,
+    type: Boolean
+  });
+
 })
 
 /**
