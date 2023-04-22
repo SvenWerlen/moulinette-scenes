@@ -74,7 +74,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // - ScenePacker : basePath based on IMG location
     // - Other cases : basePath based on JSON location
     const basePath = "tokens" in r.data ? r.data.img.substring(0, r.data.img.lastIndexOf('.')) : r.filename.substring(0, r.filename.lastIndexOf('.'))
-    r.baseURL = `${URL}${pack.path}/${basePath}`
+    r.baseURL = URL.length > 0 || pack.path.length > 0 ? `${URL}${pack.path}/${basePath}` : basePath
     
     const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
     const displayName = r.data.name;
