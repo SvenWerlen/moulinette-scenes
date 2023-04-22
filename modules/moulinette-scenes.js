@@ -388,12 +388,16 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
             }
             const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
             const thumbFilename = thumbPath.split("/").pop()
-            const thumb = await ImageHelper.createThumbnail(baseURL + imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
-            // convert to file
-            const res = await fetch(thumb.thumb);
-            const buf = await res.arrayBuffer();
-            const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
-            await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/")), true, p.source)
+            try {
+              const thumb = await ImageHelper.createThumbnail(baseURL + imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
+              // convert to file
+              const res = await fetch(thumb.thumb);
+              const buf = await res.arrayBuffer();
+              const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
+              await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/")), true, p.source)
+            } catch (error) {
+              console.warn(`Moulinette Scenes | Failed to create thumbnail for ${imgPath}.`, error);
+            }
           }
         }
       }

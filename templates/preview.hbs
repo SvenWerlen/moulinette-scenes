@@ -4,14 +4,14 @@
     <div class="scene">
       {{#unless asset.isVideo}}
         {{#if pack.isLocal}}
-          <img id="previewImage" width="100%" height="100%" src="{{pack.path}}/{{asset.data.img}}" />
+          <img id="previewImage" width="100%" height="100%" src="{{#if pack.path}}{{pack.path}}/{{/if}}{{asset.data.img}}" />
         {{else}}
           <img id="previewImage" width="100%" height="100%" src="{{previewImage}}" />
         {{/if}}
       {{/unless}}
       {{#if asset.isVideo}}
         <video id="previewImage" width="100%" height="100%" autoplay loop muted>
-          <source src="{{pack.path}}/{{asset.data.img}}{{asset.sas}}" type="video/webm">
+          <source src="{{#if pack.path}}{{pack.path}}/{{/if}}{{asset.data.img}}{{asset.sas}}" type="video/webm">
           Your browser does not support the video tag.
         </video>
       {{/if}}
