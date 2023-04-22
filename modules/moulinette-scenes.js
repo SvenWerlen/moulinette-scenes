@@ -271,7 +271,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const MoulinetteFileUtil = game.moulinette.applications.MoulinetteFileUtil;
 
     const debug = game.settings.get("moulinette-core", "debugScanAssets");
-
     // read publisher info from module.json
     let publishers = []
     if(debug) console.log(`Moulinette FileUtil | Root: scanning ${sourcePath} ...`)
@@ -378,7 +377,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       game.moulinette.applications.Moulinette.inprogress(this.html.find(".indexScenes"))
       // index from Data / My Asset Library (The Forge)
-      let publishers = await MoulinetteScenes.scanScenes(FileUtil.getSource(), MoulinetteScenes.FOLDER_MODULES);
+      let publishers = await MoulinetteScenes.scanScenes("data", MoulinetteScenes.FOLDER_MODULES);
       if(typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
         // index from Forge Bazaar
         publishers = [].concat(publishers, await MoulinetteScenes.scanScenes("forge-bazaar", MoulinetteScenes.FOLDER_MODULES))
