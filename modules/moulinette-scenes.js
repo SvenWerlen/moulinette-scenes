@@ -338,7 +338,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
                       ],
                       "drawings": scene.data.drawings.size > 0,
                       "eDeps":{},
-                      "img": scene.data.img.substring(pack.path.length),
+                      "img": scene.data.img.startsWith("http") ? scene.data.img : scene.data.img.substring(pack.path.length),
                       "lights": scene.data.lights.size > 0,
                       "name": scene.data.name,
                       "journalId": scene.id,
@@ -403,8 +403,15 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
               }
               const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
               const thumbFilename = thumbPath.split("/").pop()
+              const thumbFolder = thumbPath.substring(0, thumbPath.lastIndexOf("/"))
               try {
                 console.log(`Moulinette Scenes | Creating thumbnail for ${imgPath}`)
+                // skip map if thumbnail already exists
+                if(await FileUtil.fileExists(`${thumbFolder}/${thumbFilename}`, p.source)) {
+                  console.warn(`Moulinette Scenes | Thumbnail ${thumbFolder}/${thumbFilename} already exists. Skipping.`)
+                  continue
+                }
+
                 const headData = await fetch(baseURL + imgPath, {method: 'HEAD'})
                 const fileSize = headData.headers.get("content-length")
                 if(fileSize > FileUtil.MAX_THUMB_FILESIZE) {
@@ -416,7 +423,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
                 const res = await fetch(thumb.thumb);
                 const buf = await res.arrayBuffer();
                 const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
-                await FileUtil.uploadFile(thumbFile, thumbFilename, thumbPath.substring(0, thumbPath.lastIndexOf("/")), true, p.source)
+                await FileUtil.uploadFile(thumbFile, thumbFilename, thumbFolder, true, p.source)
               } catch (error) {
                 console.warn(`Moulinette Scenes | Failed to create thumbnail for ${imgPath}.`, error);
               }
