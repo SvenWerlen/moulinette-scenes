@@ -63,10 +63,10 @@ export class MoulinettePreview extends FormApplication {
     }
 
     // const assetURL
-    const assetURL = this.asset.data.img.startsWith("http") || !this.pack.path ? this.asset.data.img : `${this.pack.path}/${this.asset.data.img}`
+    this.assetURL = this.asset.data.img.startsWith("http") || !this.pack.path ? this.asset.data.img : `${this.pack.path}/${this.asset.data.img}`
 
     const previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
-    return { asset: this.asset, previewImage: previewImage, pack: this.pack, assetURL: assetURL, filename: filename, isScenePacker: scenePacker }
+    return { asset: this.asset, previewImage: previewImage, pack: this.pack, assetURL: this.assetURL, filename: filename, isScenePacker: scenePacker }
   }
 
   activateListeners(html) {
@@ -171,7 +171,7 @@ export class MoulinettePreview extends FormApplication {
       if(this.pack.isRemote) {
         data.img = await this.downloadAsset()
       } else {
-        data.img = `${this.pack.path}/${this.asset.filename}`
+        data.img = this.assetURL
       }
       // create folder (where to store the journal article)
       const folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "JournalEntry")
@@ -250,7 +250,7 @@ export class MoulinettePreview extends FormApplication {
               "navigation": false,
               "width": img.naturalWidth,
               "height": img.naturalHeight,
-              "img": `${this.pack.path}/${this.asset.filename}`
+              "img": this.assetURL
             })
           } else {
             console.error("Moulinette Preview | HTML Image not found")
