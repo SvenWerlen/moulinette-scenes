@@ -6,6 +6,16 @@ import { MoulinetteLocalExport } from "./modules/moulinette-localexport.js"
 Hooks.once("init", async function () {
   console.log("Moulinette Scenes | Init")
 
+  game.settings.register("moulinette-scenes", "createFolders", {
+    name: game.i18n.localize("mtte.configCreateFolders"),
+    hint: game.i18n.localize("mtte.configCreateFoldersHint"),
+    scope: "world",
+    config: true,
+    default: true,
+    type: Boolean
+  });
+
+
   game.settings.register("moulinette-scenes", "generateThumbnails", {
     name: game.i18n.localize("mtte.configGenerateThumbnails"),
     hint: game.i18n.localize("mtte.configGenerateThumbnailsHint"),

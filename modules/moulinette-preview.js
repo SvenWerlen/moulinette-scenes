@@ -183,6 +183,8 @@ export class MoulinettePreview extends FormApplication {
     else if(source.classList.contains("importScene")) {
       ui.scenes.activate() // give focus to scenes
 
+      const useFolders = game.settings.get("moulinette-scenes", "createFolders")
+
       // special case to delegate to Scene Packer
       if("tokens" in this.asset.data) {
         if(typeof ScenePacker === 'object' && typeof ScenePacker.MoulinetteImporter === 'function') {
@@ -212,6 +214,9 @@ export class MoulinettePreview extends FormApplication {
         }
       }
 
+      /**
+       * Default case : import scene
+       */
       try {
         let jsonAsText;
 
@@ -270,7 +275,11 @@ export class MoulinettePreview extends FormApplication {
           sceneData.height = img.naturalHeight
         }
 
-        sceneData.folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "Scene")
+        // generate folder structure
+        if(useFolders) {
+          sceneData.folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "Scene")
+        }
+
         let newScene = await Scene.create(sceneData);
         let tData = await newScene.createThumbnail()
         await newScene.update({thumb: tData.thumb}); // force generating the thumbnail

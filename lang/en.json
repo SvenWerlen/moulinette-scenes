@@ -5,6 +5,8 @@
   "mtte.authorURLToolTip": "URL to author page in which the image is shown. Moulinette respects copyrights and would eventually contact the author.",
   "mtte.clipboardImage": "Clipboard",
   "mtte.clipboardImageToolTip": "Copy path into clipboard. You can then reuse elsewhere.",
+  "mtte.configCreateFolders": "Organize into folders",
+  "mtte.configCreateFoldersHint": "Downloads scenes using 'Moulinette/[Creator]/[Pack]' folder structure. If disabled, all scenes are downloaded in the top-level directory (root)",
   "mtte.configGenerateThumbnails": "Generate thumbnails",
   "mtte.configGenerateThumbnailsHint": "Generates thumbnails for each indexed map. This feature slows down the indexing process and could cause server crashes (due to memory consumption)",
   "mtte.configureSources": "Configure sources",

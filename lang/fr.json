@@ -5,6 +5,8 @@
   "mtte.authorURLToolTip": "Adresse (URL) vers la page de l'auteur de l'image. Moulinette est respecteux des droits d'auteur et pourrait éventuellement contacter l'auteur pour obtenir les droits.",
   "mtte.clipboardImage": "Presse-papier",
   "mtte.clipboardImageToolTip": "Copier le chemin vers le presse-papier. Vous pouvez ainsi le réutiliser ailleurs.",
+  "mtte.configCreateFolders": "Organiser dans des répertoires",
+  "mtte.configCreateFoldersHint": "Télécharge les scènes en utilisant la structure de répertoire 'Moulinette/[Creator]/[Pack]'. Si désactivé, toutes les scènes sont téléchargées à la racine.",
   "mtte.configGenerateThumbnails": "Gérérer des vignettes",
   "mtte.configGenerateThumbnailsHint": "Génère des vignettes pour chaque carte indexée. Cette fonctionnalité ralentit le processus d'indexation et peut causer un crash de votre serveur (en raison de l'utilisation de mémoire).",
   "mtte.configureSources": "Configurer sources",
