@@ -43,7 +43,6 @@ Hooks.once("ready", async function () {
       description: game.i18n.localize("mtte.scenesDescription"),
       instance: new moduleClass(),
       actions: [
-        {id: "indexScenes", icon: "fas fa-sync" ,name: game.i18n.localize("mtte.indexScenes"), help: game.i18n.localize("mtte.indexScenesToolTip") },
         {id: "configureSources", icon: "fas fa-cogs" ,name: game.i18n.localize("mtte.configureSources"), help: game.i18n.localize("mtte.configureSourcesToolTip") },
         {id: "howto", icon: "fas fa-question-circle" ,name: game.i18n.localize("mtte.howto"), help: game.i18n.localize("mtte.howtoToolTip") }
       ]

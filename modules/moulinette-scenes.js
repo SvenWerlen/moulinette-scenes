@@ -4,8 +4,10 @@ import { MoulinettePreview } from "./moulinette-preview.js"
  * Forge Module for scenes
  */
 export class MoulinetteScenes extends game.moulinette.applications.MoulinetteForgeModule {
+  
   static FOLDER_MODULES  = "modules";
   static FOLDER_CUSTOM_SCENES = "moulinette/scenes/custom";
+  static SCENE_EXT = ["jpg","jpeg","png","webp", "webm"]
 
   constructor() {
     super()
@@ -35,7 +37,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
-      baseURL + `moulinette/scenes/custom/index-${worldId}.json`])
+      baseURL + `moulinette/scenes/custom/index-mtte.json`])
 
     // remove non-scene
     this.assets = index.assets.filter(a => {
@@ -325,7 +327,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
               "name": scenePack.label,
               "path": publisher,
               "sas": null,
-              "url":moduleJsonContent.url
+              "url": moduleJsonContent.url,
+              "optimized" : true
             }
 
             for(let scene of scenes) {
@@ -350,14 +353,18 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
                 );
               }
             }
-            packs.push(pack);
+            if(pack.assets.length > 0) {
+              packs.push(pack);
+            }
           }
 
-          publishers.push({
-            publisher: moduleJsonContent.author ? moduleJsonContent.author : game.i18n.localize("mtte.unknown"),
-            website: moduleJsonContent.url ? moduleJsonContent.url : null,
-            packs
-          })
+          if(packs.length > 0) {
+            publishers.push({
+              publisher: moduleJsonContent.author ? moduleJsonContent.author : game.i18n.localize("mtte.unknown"),
+              website: moduleJsonContent.url ? moduleJsonContent.url : null,
+              packs
+            })
+          }
         }
       }
       catch (e) {
@@ -370,83 +377,27 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     return publishers
   }
 
-  async onAction(classList) {
-    const FileUtil = game.moulinette.applications.MoulinetteFileUtil;
-    const indexFileJSON = `index-${game.world.id}.json`
-    if(classList.contains("indexScenes")) {
-      ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
-      game.moulinette.applications.Moulinette.inprogress(this.html.find(".indexScenes"))
-      // index from Data / My Asset Library (The Forge)
-      let publishers = await MoulinetteScenes.scanScenes("data", MoulinetteScenes.FOLDER_MODULES);
-      if(typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
-        // index from Forge Bazaar
-        publishers = [].concat(publishers, await MoulinetteScenes.scanScenes("forge-bazaar", MoulinetteScenes.FOLDER_MODULES))
-        // index for Forge UserData
-        publishers = [].concat(publishers, await MoulinetteScenes.scanScenes("data", MoulinetteScenes.FOLDER_MODULES))
-      }
-
-      // index images as scenes
-      ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
-      const EXT = ["jpg","jpeg","png","webp", "webm"]
-      const localScenes = await FileUtil.scanSourceAssets("scenes", EXT)
-      if(game.settings.get("moulinette-scenes", "generateThumbnails")) {
-        for(const sc of localScenes) {
-          for(const p of sc.packs) {
-            const baseURL = await FileUtil.getBaseURL(p.source)
-            for(const a of p.assets) {
-              if(a.indexOf("_thumb") > 0) continue;
-              let imgPath = p.path.length > 0 ? `${p.path}/${a}` : a
-              // remove s3/forge full URL from image path (for S3)
-              if(baseURL.length > 0 && imgPath.startsWith(baseURL)) {
-                imgPath = imgPath.substring(baseURL.length)
-              }
-              const thumbPath = imgPath.substring(0, imgPath.lastIndexOf(".")) + "_thumb.webp"
-              const thumbFilename = thumbPath.split("/").pop()
-              const thumbFolder = thumbPath.substring(0, thumbPath.lastIndexOf("/"))
-              try {
-                console.log(`Moulinette Scenes | Creating thumbnail for ${imgPath}`)
-                // skip map if thumbnail already exists
-                if(await FileUtil.fileExists(`${thumbFolder}/${thumbFilename}`, p.source)) {
-                  console.warn(`Moulinette Scenes | Thumbnail ${thumbFolder}/${thumbFilename} already exists. Skipping.`)
-                  continue
-                }
-
-                const headData = await fetch(baseURL + imgPath, {method: 'HEAD'})
-                const fileSize = headData.headers.get("content-length")
-                if(fileSize > FileUtil.MAX_THUMB_FILESIZE) {
-                  console.warn(`Moulinette Scenes | File too large (${fileSize}). Thumbnail generation skipped.`)
-                  continue;
-                }
-                const thumb = await ImageHelper.createThumbnail(baseURL + imgPath, { width: 400, height: 400, center: true, format: "image/webp"})
-                // convert to file
-                const res = await fetch(thumb.thumb);
-                const buf = await res.arrayBuffer();
-                const thumbFile = new File([buf], thumbFilename, { type: "image/webp" })
-                await FileUtil.uploadFile(thumbFile, thumbFilename, thumbFolder, true, p.source)
-              } catch (error) {
-                console.warn(`Moulinette Scenes | Failed to create thumbnail for ${imgPath}.`, error);
-              }
-            }
-          }
-        }
-      } else {
-        console.warn("Moulinette Scenes | Thumbnails generation skipped!");
-      }
-      publishers.push(...localScenes)
-
-      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], indexFileJSON, { type: "application/json", lastModified: new Date() }), indexFileJSON, MoulinetteScenes.FOLDER_CUSTOM_SCENES, true)
-      ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
-      game.moulinette.cache.clear()
-      this.clearCache()
-      return true
+  /**
+   * Indexes all scenes from loaded modules
+   */
+  async indexAssets() {
+    // index from Data / My Asset Library (The Forge)
+    const publishers = await MoulinetteScenes.scanScenes("data", MoulinetteScenes.FOLDER_MODULES);
+    if(typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
+      // index from Forge Bazaar
+      publishers.push(...await MoulinetteScenes.scanScenes("forge-bazaar", MoulinetteScenes.FOLDER_MODULES))
     }
+    return publishers
+  }
+
+  async onAction(classList) {
     // ACTION - HELP / HOWTO
-    else if(classList.contains("howto")) {
+    if(classList.contains("howto")) {
       new game.moulinette.applications.MoulinetteHelp("scenes").render(true)
     }
     // ACTION - CONFIGURE SOURCES
     else if(classList.contains("configureSources")) {
-      (new game.moulinette.applications.MoulinetteSources(["scenes"])).render(true)
+      (new game.moulinette.applications.MoulinetteSources(this, ["scenes"], MoulinetteScenes.SCENE_EXT)).render(true)
     }
   }
 }
