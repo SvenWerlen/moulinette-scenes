@@ -67,7 +67,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
    */
   async generateAsset(r, idx, folderIdx = null) {
     const pack = this.assetsPacks[r.pack]
-    const URL = pack.isLocal || pack.isRemote ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const URL = pack.isLocal || pack.isRemote || pack.path.match(/^https?:\/\//) || r.filename.match(/^https?:\/\//) ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     
     // sas (Shared access signature) for accessing remote files (Azure)
     r.sas = pack.sas ? "?" + pack.sas : ""

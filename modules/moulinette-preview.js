@@ -63,7 +63,7 @@ export class MoulinettePreview extends FormApplication {
     }
 
     // const assetURL
-    this.assetURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL(this.pack.source)
+    this.assetURL = this.asset.data.img.startsWith("http") ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL(this.pack.source)
     this.assetURL += this.asset.data.img.startsWith("http") || !this.pack.path ? this.asset.data.img : `${this.pack.path}/${this.asset.data.img}`
 
     const previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
