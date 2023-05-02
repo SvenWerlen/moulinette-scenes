@@ -96,9 +96,10 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       if(game.packs.get(r.filename)?.get(r.data.journalId)) {
         thumbSrc = game.packs.get(r.filename)?.get(r.data.journalId).thumb
       }
+    } else if(pack.isRemote) {
+      thumbSrc = `${r.baseURL}_thumb.webp${r.sas}`
     } else {
       if(game.settings.get("moulinette-scenes", "generateThumbnails")) {
-        thumbSrc = fallBackURL
         // baseURL for the current FVTT installation
         const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
         // baseURL specific to the pack (could point to another source)
