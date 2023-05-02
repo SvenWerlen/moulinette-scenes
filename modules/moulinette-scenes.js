@@ -98,7 +98,14 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       }
     } else {
       if(game.settings.get("moulinette-scenes", "generateThumbnails")) {
-        thumbSrc = `${r.baseURL}_thumb.webp${r.sas}`
+        thumbSrc = fallBackURL
+        // baseURL for the current FVTT installation
+        const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+        // baseURL specific to the pack (could point to another source)
+        const baseURLPack = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL(pack.source)
+        // asset URL (without extension)
+        const assetURL = r.baseURL.startsWith(baseURLPack) ? r.baseURL.substring(baseURLPack.length) : baseURL
+        thumbSrc =  `${baseURL}moulinette/thumbs/${assetURL}_thumb.webp`
       } else {
         thumbSrc = fallBackURL
       }
