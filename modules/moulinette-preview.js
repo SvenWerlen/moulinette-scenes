@@ -5,7 +5,7 @@ export class MoulinettePreview extends FormApplication {
 
   constructor(asset, pack) {
     super()
-    this.asset = asset;
+    this.asset = duplicate(asset);
     this.pack = pack;
   }
 
@@ -24,11 +24,52 @@ export class MoulinettePreview extends FormApplication {
     });
   }
 
+  /**
+   * This method tries to retrieve the background image of a scene packaged with ScenePacker
+   * 1) Retrieves pack Info
+   * 2) Retrieves list of scenes
+   * 3) Match scene with thumbnail
+   * 4) Retrieve background img path
+   * 5) Match path in pack Info
+   */
+  async getScenePackerBackgroundImage() {
+    if("tokens" in this.asset.data) {
+      const baseURL = `/assets/${game.moulinette.user.id}/${this.pack.packId}`
+      const client = new game.moulinette.applications.MoulinetteClient()
+      const packInfo = await client.get(baseURL)
+      if (packInfo.status === 200) {
+        if("data/Scene.json" in packInfo.data) {
+          const response = await fetch(packInfo.data["data/Scene.json"]);
+          if(response.status === 200) {
+            const scenes = await response.json()
+            for(const sc of scenes) {
+              if(sc._id == this.asset.filename) {
+                let backgroundURL = null
+                if("background" in sc && "src" in sc["background"]) {
+                  backgroundURL = sc["background"]["src"]
+                } else if("img" in sc) {
+                  backgroundURL = sc["img"]
+                }
+                if(backgroundURL && backgroundURL.length > 0) {
+                  const key = `data/assets/${backgroundURL}`
+                  if(key in packInfo.data) {
+                    return packInfo.data[key]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null
+  };
+
   async hasOriginalThumb() {
     // videos and local images won't have original thumbs on Moulinette Cloud
     if(this.asset.isVideo || this.pack.isLocal) return false
     try {
-      const test = await jQuery.ajax({
+      await jQuery.ajax({
         url: this.asset.baseURL + "_thumb_orig.webp" + this.asset.sas,
         type: 'HEAD',
         cache: false
@@ -48,12 +89,19 @@ export class MoulinettePreview extends FormApplication {
 
     // detect if scene packer
     if("tokens" in this.asset.data) {
-      this.asset.baseURL += "_thumb"
-      scenePacker = true
+      const scenePackerBackground = await this.getScenePackerBackgroundImage()
+      if(scenePackerBackground) {
+        this.asset.data.img = scenePackerBackground
+        this.asset.sas = null
+      } else {
+        this.asset.baseURL += "_thumb"
+        scenePacker = true
+      }
     }
 
     // detect if video
-    if(this.asset.data.img.endsWith(".webm")) {
+    const imgPath = this.asset.data.img.split("?")[0]
+    if(imgPath.endsWith(".webm") || imgPath.endsWith(".mp4")) {
       this.asset.isVideo = true
     }
 
