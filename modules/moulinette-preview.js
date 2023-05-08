@@ -226,7 +226,7 @@ export class MoulinettePreview extends FormApplication {
       const folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "JournalEntry")
       // generate journal
       const name = data.img.split('/').pop()
-      const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder.id} )
+      const entry = await game.moulinette.applications.Moulinette.generateArticle(name, data.img, folder.id)
       return entry.sheet.render(true)
     }
     else if(source.classList.contains("importScene")) {

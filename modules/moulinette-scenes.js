@@ -20,7 +20,6 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.assets = null
     this.assetsPacks = null
     this.searchResults = null
-    this.matchesCloud = null
   }
   
   /**
@@ -60,6 +59,16 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     this.assets.sort((a, b) => (a.data.name > b.data.name) ? 1 : -1)
 
     return duplicate(this.assetsPacks)
+  }
+  
+  /**
+   * Returns true if scene is gridded (based on name)
+   * - Must contain "grid" in name
+   * - Must not contain "ungrid" in name
+   * - Must not contain "gridless" in name
+   */
+  static isSceneGridded(path) {
+    return path.toLowerCase().indexOf("grid") > 0 && path.toLowerCase().indexOf("ungrid") < 0 && path.toLowerCase().indexOf("gridless") < 0
   }
   
   /**
@@ -120,24 +129,26 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     if(r.data.drawings) html += `<div class="info"><i class="fas fa-pencil-alt"></i></div>`
     if(r.data.notes) html += `<div class="info"><i class="fas fa-book-open"></i></div>`
     if(r.data.tokens) html += `<div class="info"><i class="fas fa-users"></i></div>`
-    html += `</div><div class="resolutions">`
+    html += `</div>`
     // Scene Packer
-    if("tokens" in r.data) html += `<div class="info" title="${game.i18n.localize("mtte.scenepackerpack")}"><img class="packer" src="modules/moulinette-scenes/img/scenepacker.svg"/></div>`
+    if("tokens" in r.data) html += `<div class="types"><div class="info" title="${game.i18n.localize("mtte.scenepackerpack")}"><img class="packer" src="modules/moulinette-scenes/img/scenepacker.svg"/></div></div>`
     // HD/4K
-    if(basePath.indexOf("4K_") > 0) html += `<div class="info">4K</i></div>`
-    else if(basePath.indexOf("HD_") > 0) html += `<div class="info">HD</i></div>`
+    html += `<div class="resolutions">`
+    if(basePath.indexOf("4K_") > 0 || pack.name.endsWith("4K")) html += `<div class="info">4K</i></div>`
+    else if(basePath.indexOf("HD_") > 0 || pack.name.endsWith("HD")) html += `<div class="info">HD</i></div>`
     // Grid
-    if(basePath.toLowerCase().indexOf("grid") > 0 && basePath.toLowerCase().indexOf("ungrid") < 0 && basePath.toLowerCase().indexOf("gridless") < 0) {
-      html += `<div class="info"><i class="fas fa-border-all"></i></i></div>`
+    if(MoulinetteScenes.isSceneGridded(basePath)) {
+      html += `<div class="info"><i class="fas fa-border-all"></i></div>`
     }
+    html += "</div>"
     
-    return html + "</div></div>"
+    return html + "</div>"
   }
   
   /**
    * Implements getAssetList
    */
-  async getAssetList(searchTerms, packs, publisher) {
+  async getAssetList(searchTerms, packs, publisher, moduleFilters) {
     let assets = []
     const packList = packs == "-1" ? null : ('' + packs).split(",").map(Number);
 
@@ -154,6 +165,17 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       if( packList && !packList.includes(t.pack) ) return false
       // publisher doesn't match selection
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
+      // check module filters
+      if(moduleFilters.includes("walls") && !t.data.walls) return false
+      if(moduleFilters.includes("lights") && !t.data.lights) return false
+      if(moduleFilters.includes("drawings") && !t.data.drawings) return false
+      if(moduleFilters.includes("notes") && !t.data.notes) return false
+      if(moduleFilters.includes("tokens") && !t.data.tokens) return false
+      if(moduleFilters.includes("hd") && !this.assetsPacks[t.pack].name.endsWith("HD")) return false
+      if(moduleFilters.includes("4K") && !this.assetsPacks[t.pack].name.endsWith("4K")) return false
+      if(moduleFilters.includes("SP") && !t.data.tokens) return false
+      if(moduleFilters.includes("grid") && !MoulinetteScenes.isSceneGridded(t.filename)) return false
+      if(moduleFilters.includes("gridless") && MoulinetteScenes.isSceneGridded(t.filename)) return false
       // check if text match
       for( const f of searchTermsList ) {
         const textToSearch = game.moulinette.applications.Moulinette.cleanForSearch(t.data.name + " " + t.filename)
@@ -197,7 +219,24 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     // retrieve available assets that the user doesn't have access to
     //this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "scenes", this.assetsPacks)
     this.matchesCloudTerms = searchTerms
-    this.matchesCloudCount = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatchesMoulinetteCloud(searchTerms, "maps", true)
+    const parent = this
+    game.moulinette.applications.MoulinetteFileUtil.getAvailableMatchesMoulinetteCloud(searchTerms, "maps", true).then(results => {
+      // not yet ready?
+      if(!parent.html) return;
+      // display/hide showCase
+      const showCase = parent.html.find(".showcase")
+      if(results && results.count > 0) {
+        // display/hide additional content
+        showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: results.count}))
+        showCase.addClass("clickable")
+        showCase.show()
+      }
+      else {
+        showCase.html("")
+        showCase.removeClass("clickable")
+        showCase.hide()
+      }
+    })
 
     return assets
   }
@@ -221,20 +260,8 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       $(el.currentTarget).find(".text").hide()
     });
 
-    // display/hide showCase
-    const showCase = this.html.find(".showcase")
-    if(this.matchesCloudCount && this.matchesCloudCount["count"] > 0) {
-      // display/hide additional content
-      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: this.matchesCloudCount["count"]}))
-      showCase.addClass("clickable")
-      showCase.click(ev => new game.moulinette.applications.MoulinetteAvailableAssets(this.matchesCloudTerms, "maps", 200).render(true))
-      showCase.show()
-    }
-    else {
-      showCase.html("")
-      showCase.removeClass("clickable")
-      showCase.hide()
-    }
+    // click on showCase
+    this.html.find(".showcase").click(ev => new game.moulinette.applications.MoulinetteAvailableAssets(this.matchesCloudTerms, "maps", 200).render(true))
 
     // fallback image
     this.html.find(".scene img").on('error', ev => {
@@ -409,4 +436,55 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       (new game.moulinette.applications.MoulinetteSources(this, ["scenes"], MoulinetteScenes.SCENE_EXT)).render(true)
     }
   }
+
+  /**
+   * Overwrite this function to add filters
+   */
+  getFilters() {
+    return [
+      {
+        id: "walls",
+        name: game.i18n.localize("mtte.filterHasWalls"),
+        icon: `<i class="fas fa-university"></i>`,
+      }, {
+        id: "lights",
+        name: game.i18n.localize("mtte.filterHasLights"),
+        icon: `<i class="far fa-lightbulb"></i>`,
+      }, {
+        id: "drawings",
+        name: game.i18n.localize("mtte.filterHasDrawings"),
+        icon: `<i class="fas fa-pencil-alt"></i>`,
+      }, {
+        id: "notes",
+        name: game.i18n.localize("mtte.filterHasNotes"),
+        icon: `<i class="fas fa-book-open"></i>`,
+      }, {
+        id: "tokens",
+        name:game.i18n.localize("mtte.filterHasTokens"),
+        icon: `<i class="fas fa-users"></i>`,
+      }, {
+        id: "hd",
+        name: game.i18n.localize("mtte.filterHDOnly"),
+        icon: "",
+      }, {
+        id: "4K",
+        name: game.i18n.localize("mtte.filter4KOnly"),
+        icon: "",
+      }, {
+        id: "SP",
+        name: game.i18n.localize("mtte.isScenePacker"),
+        icon: "",
+      }, {
+        id: "grid",
+        name: game.i18n.localize("mtte.filterHasGrid"),
+        icon: `<i class="fas fa-border-all"></i>`,
+      }, {
+        id: "gridless",
+        name: game.i18n.localize("mtte.filterIsGridless"),
+        icon: `<i class="fas fa-border-none"></i>`,
+      }
+    ]
+  }
+
+
 }
