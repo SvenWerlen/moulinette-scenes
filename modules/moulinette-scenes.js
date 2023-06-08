@@ -89,7 +89,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
     const fallBackURL = URL.length > 0 || pack.path.length > 0 ? `${URL}${pack.path}/${r.filename}` : r.filename
     
     const filename = r.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ")
-    const displayName = filename.substring(0, filename.lastIndexOf("."))
+    const displayName = decodeURIComponent(filename.substring(0, filename.lastIndexOf(".")))
     // ensure compendium is loaded before accessing it
     if(pack.isLocal && game.packs.get(r.filename)?.size === 0) {
        await game.packs.get(r.filename)?.getDocuments();
@@ -121,7 +121,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       }
     }
 
-    let html = `<div class="scene" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img class="sc" width="200" height="200" src="${thumbSrc}" data-fallback="${fallBackURL}"/>`
+    let html = `<div class="scene" title="${decodeURIComponent(r.data.name)}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img class="sc" width="200" height="200" src="${thumbSrc}" data-fallback="${fallBackURL}"/>`
     html += `<div class="text">${displayName}</div><div class="includes">`
     if(r.data.walls) html += `<div class="info"><i class="fas fa-university"></i></div>`
     if(r.data.lights) html += `<div class="info"><i class="far fa-lightbulb"></i></div>`

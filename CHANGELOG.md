@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [11.0.1] - 2023-05-07
 ### Fixed
+- 11.0.2: Fix paths for S3 (for files with special characters)
 - 11.0.1: Official support for V11
 ### Changed
 - Versionning changed to simpler incremental format.

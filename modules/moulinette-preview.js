@@ -84,7 +84,7 @@ export class MoulinettePreview extends FormApplication {
 
   async getData() {
     const filename = this.asset.filename.split('/').pop().replace(/_/g, " ").replace(/-/g, " ").replace(".json", "")
-
+    
     let scenePacker = false
 
     // detect if scene packer
@@ -111,8 +111,14 @@ export class MoulinettePreview extends FormApplication {
     }
 
     // const assetURL
-    this.assetURL = this.asset.data.img.startsWith("http") ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL(this.pack.source)
-    this.assetURL += this.asset.data.img.startsWith("http") || !this.pack.path ? this.asset.data.img : `${this.pack.path}/${this.asset.data.img}`
+    const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL(this.pack.source)
+    if(this.asset.data.img.startsWith("http")) {
+      this.assetURL = this.asset.data.img
+    } else {
+      const assetURL = this.pack.path ? `${this.pack.path}/${this.asset.data.img}` : this.asset.data.img
+      this.assetURL = assetURL.startsWith("http") ? assetURL : baseURL = assetURL
+
+    }
 
     const previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
     return { asset: this.asset, previewImage: previewImage, pack: this.pack, assetURL: this.assetURL, filename: filename, isScenePacker: scenePacker }
