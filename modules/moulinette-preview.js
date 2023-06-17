@@ -116,7 +116,7 @@ export class MoulinettePreview extends FormApplication {
       this.assetURL = this.asset.data.img
     } else {
       const assetURL = this.pack.path ? `${this.pack.path}/${this.asset.data.img}` : this.asset.data.img
-      this.assetURL = assetURL.startsWith("http") ? assetURL : baseURL = assetURL
+      this.assetURL = assetURL.startsWith("http") ? assetURL : baseURL + assetURL
 
     }
 
