@@ -55,23 +55,24 @@ export class MoulinetteExport extends FormApplication {
       return ""
     }
 
-    if(folder.data.parent) {
-      const parent = game.folders.get(folder.data.parent)
+    if(folder.parent) {
+      const parent = game.folders.get(folder.parent)
       if( parent ) {
         return MoulinetteExport.getFolderPath(parent) + "/" + folder.name
       }
     }
-    return folder.data.name
+    return folder.name
   }
 
   /**
    * Returns all the scenes from folder
    */
   static getScenesFromFolder(folder) {
-    let scenes = game.scenes.filter(sc => sc.data.folder == folder.id)
-    const subFolders = game.folders.filter(f => f.data.parent == folder.id)
-    for(const subFolder of subFolders) {
-      scenes = scenes.concat(MoulinetteExport.getScenesFromFolder(subFolder))
+    let scenes = game.scenes.filter(sc => sc.folder && sc.folder.id == folder.id)
+    for(const child of folder.children) {
+      if(child.folder) {
+        scenes = scenes.concat(MoulinetteExport.getScenesFromFolder(child.folder))
+      }
     }
     return scenes;
   }
@@ -111,7 +112,7 @@ export class MoulinetteExport extends FormApplication {
     }
 
     // remove tokens (won't work) and thumb (will be regenerated)
-    scene = duplicate(scene.data)
+    scene = duplicate(scene)
     scene.tokens = []
     delete(scene.thumb)
 
