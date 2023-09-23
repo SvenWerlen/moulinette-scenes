@@ -95,8 +95,8 @@ export class MoulinettePreview extends FormApplication {
         this.asset.sas = null
       } else {
         this.asset.baseURL += "_thumb"
-        scenePacker = true
       }
+      scenePacker = true
     }
 
     // detect if video
@@ -119,8 +119,12 @@ export class MoulinettePreview extends FormApplication {
       this.assetURL = assetURL.startsWith("http") ? assetURL : baseURL + assetURL
 
     }
-
-    const previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
+    
+    let previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
+    // special case for ScenePacker
+    if(scenePacker) {
+      previewImage = this.assetURL
+    }
     return { asset: this.asset, previewImage: previewImage, pack: this.pack, assetURL: this.assetURL, filename: filename, isScenePacker: scenePacker }
   }
 
