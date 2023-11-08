@@ -368,22 +368,23 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
             }
 
             for(let scene of scenes) {
-              if(scene.data.img) {
+              const imgSrc = scene.background?.src ? scene.background.src : scene.img
+              if(imgSrc) {
                 pack.assets.push(
                     {
                       "deps":[
-                        scene.data.img
+                        imgSrc
                       ],
-                      "drawings": scene.data.drawings.size > 0,
+                      "drawings": scene.drawings.size > 0,
                       "eDeps":{},
-                      "img": scene.data.img.startsWith("http") ? scene.data.img : scene.data.img.substring(pack.path.length),
-                      "lights": scene.data.lights.size > 0,
-                      "name": scene.data.name,
+                      "img": imgSrc.startsWith("http") ? imgSrc : imgSrc.substring(pack.path.length),
+                      "lights": scene.lights.size > 0,
+                      "name": scene.name,
                       "journalId": scene.id,
                       "path": packname,
-                      "sounds": scene.data.sounds.size > 0,
+                      "sounds": scene.sounds.size > 0,
                       "type":"scene",
-                      "walls": scene.data.walls.size > 0
+                      "walls": scene.walls.size > 0
                       // don't save thumb - too large size
                     }
                 );
