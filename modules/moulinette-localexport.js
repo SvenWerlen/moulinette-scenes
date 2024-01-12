@@ -42,23 +42,24 @@ export class MoulinetteLocalExport extends FormApplication {
       return ""
     }
 
-    if(folder.data.parent) {
-      const parent = game.folders.get(folder.data.parent)
+    if(folder.parent) {
+      const parent = game.folders.get(folder.parent)
       if( parent ) {
         return MoulinetteLocalExport.getFolderPath(parent) + "/" + folder.name
       }
     }
-    return folder.data.name
+    return folder.name
   }
 
   /**
    * Returns all the scenes from folder
    */
-  static getScenesFromFolder(folder) {
-    let scenes = game.scenes.filter(sc => sc.data.folder == folder.id)
-    const subFolders = game.folders.filter(f => f.data.parent == folder.id)
-    for(const subFolder of subFolders) {
-      scenes = scenes.concat(MoulinetteLocalExport.getScenesFromFolder(subFolder))
+   static getScenesFromFolder(folder) {
+    let scenes = game.scenes.filter(sc => sc.folder && sc.folder.id == folder.id)
+    for(const child of folder.children) {
+      if(child.folder) {
+        scenes = scenes.concat(MoulinetteLocalExport.getScenesFromFolder(child.folder))
+      }
     }
     return scenes;
   }
@@ -88,8 +89,10 @@ export class MoulinetteLocalExport extends FormApplication {
       return ui.notifications.error(game.i18n.localize("mtte.errorThumbnailGeneration"));
     }
 
-    // remove tokens (won't work)
-    scene.data.tokens = []
+    // remove tokens (won't work) and thumb (will be regenerated)
+    scene = duplicate(scene)
+    scene.tokens = []
+    delete(scene.thumb)
 
     // export as JSON & detect potential paths
     const paths = new Set();
