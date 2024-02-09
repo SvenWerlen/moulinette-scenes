@@ -396,8 +396,13 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
           }
 
           if(packs.length > 0) {
+            let creator = moduleJsonContent.author
+            if(moduleJsonContent.authors && moduleJsonContent.authors.length > 0) {
+              creator = moduleJsonContent.authors[0].name
+            }
+            console.log(creator, moduleJsonContent)
             publishers.push({
-              publisher: moduleJsonContent.author ? moduleJsonContent.author : game.i18n.localize("mtte.unknown"),
+              publisher: creator ? creator : moduleJsonContent.id,
               website: moduleJsonContent.url ? moduleJsonContent.url : null,
               packs
             })
