@@ -7,7 +7,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
   
   static FOLDER_MODULES  = "modules";
   static FOLDER_CUSTOM_SCENES = "moulinette/scenes/custom";
-  static SCENE_EXT = ["jpg","jpeg","png","webp","webm","avif"]
+  static SCENE_EXT = ["jpg","jpeg","png","webp","webm","avif","mp4"]
 
   constructor() {
     super()

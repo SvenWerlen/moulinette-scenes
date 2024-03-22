@@ -307,8 +307,6 @@ export class MoulinettePreview extends FormApplication {
             jsonAsText = JSON.stringify({
               "name": game.moulinette.applications.Moulinette.prettyText(this.asset.filename.split("/").pop()),
               "navigation": false,
-              "width": img.naturalWidth,
-              "height": img.naturalHeight,
               "img": this.assetURL
             })
           } else {
@@ -329,10 +327,7 @@ export class MoulinettePreview extends FormApplication {
             JSON.parse(jsonAsText);
 
         // configure dimensions if no width/height set
-        if( !("width" in sceneData)) {
-          sceneData.width = img.naturalWidth
-          sceneData.height = img.naturalHeight
-        }
+        let needsDims = !("width" in sceneData)
 
         // generate folder structure
         if(useFolders) {
@@ -340,8 +335,14 @@ export class MoulinettePreview extends FormApplication {
         }
 
         let newScene = await Scene.create(sceneData);
-        let tData = await newScene.createThumbnail()
-        await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
+        let tData = await newScene.createThumbnail({img: newScene["background.src"] ?? newScene.background.src});
+        // reset width/height
+        let tUpdate = {thumb: tData.thumb}
+        if ( needsDims && tData.width && tData.height ) {
+          tUpdate.width = tData.width;
+          tUpdate.height = tData.height;
+        }  
+        await newScene.update(tUpdate); // force generating the thumbnail and width/height (if needsDims)
 
         ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
         if(overwrite) {
