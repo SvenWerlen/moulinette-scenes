@@ -35,9 +35,7 @@
       <div class="actions">
         <!--<button class="clipboard" title="{{localize "mtte.clipboardImageToolTip"}}"><i class="fas fa-clipboard"></i> {{localize "mtte.clipboardImage"}}</button>-->
         <button class="importScene" title="{{localize "mtte.importSceneToolTip"}}"><i class="fas fa-map"></i> {{localize "mtte.importScene"}}</button>
-        {{#unless asset.isVideo}}
         <button class="createArticle" title="{{localize "mtte.createArticleToolTip"}}"><i class="fas fa-book-open"></i> {{localize "mtte.createArticle"}}</button>
-        {{/unless}}
         <div class="option">
           <input type="checkbox" id="forceOverwrite" name="force" value="Overwrite" title="{{localize "mtte.forceOverwriteTooltip"}}">
           <label for="forceOverwrite" title="{{localize "mtte.forceOverwriteTooltip"}}"> {{localize "mtte.forceOverwrite"}}</label>
