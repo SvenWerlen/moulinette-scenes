@@ -5,7 +5,7 @@ export class MoulinettePreview extends FormApplication {
 
   constructor(asset, pack) {
     super()
-    this.asset = duplicate(asset);
+    this.asset = asset;
     this.pack = pack;
   }
 
@@ -174,6 +174,7 @@ export class MoulinettePreview extends FormApplication {
   async downloadAsset() {
     const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
     const imageURL = this.asset.data.img
+    
 
     // download image (always force because path is required)
     const destPath = FILEUTIL.getMoulinetteBasePath("scenes", this.pack.publisher, this.pack.name)
