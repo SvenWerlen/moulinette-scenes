@@ -320,9 +320,12 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       return publishers;
     }
 
+    const progressbar = (new game.moulinette.applications.MoulinetteProgress(game.i18n.localize("mtte.indexingMoulinette")))
+    progressbar.render(true)
+
     let idx = 0;
     for(const publisher of dir1.dirs) {
-      SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"), Math.round((idx / dir1.dirs.length)*100));
+      progressbar.setProgress(Math.round((idx / dir1.dirs.length)*100));
       
       const publisherId = publisher.split("/").pop()
       if(debug) console.log(`Moulinette FileUtil | Root: processing publisher ${publisherId}...`)
@@ -414,7 +417,7 @@ export class MoulinetteScenes extends game.moulinette.applications.MoulinetteFor
       }
       idx++;
     }
-    SceneNavigation._onLoadProgress(game.i18n.localize("mtte.indexingMoulinette"),100);  
+    progressbar.setProgress(100);
     
     return publishers
   }

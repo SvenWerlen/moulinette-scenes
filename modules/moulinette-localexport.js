@@ -76,8 +76,6 @@ export class MoulinetteLocalExport extends FormApplication {
     const sceneFolders = MoulinetteLocalExport.getFolderPath(scene.folder)
     const scenePath = type == "flat" || sceneFolders.length == 0 ? FOLDER : `${FOLDER}/${sceneFolders}`
 
-    SceneNavigation._onLoadProgress(game.i18n.localize("mtte.exporting"), 0);
-
     // regenerate thumbnail
     let thumb
     try {
@@ -131,8 +129,6 @@ export class MoulinetteLocalExport extends FormApplication {
     // upload JSON
     const jsonFile = sceneNameClean + ".json"
     await FILEUTIL.uploadFile(new File([jsonData], jsonFile, { type: "application/json", lastModified: new Date() }), jsonFile, scenePath, true)
-
-    SceneNavigation._onLoadProgress(game.i18n.localize("mtte.exporting"), 100);
   }
 
 
@@ -142,7 +138,9 @@ export class MoulinetteLocalExport extends FormApplication {
     const type = event.submitter.classList.contains("flat") ? "flat" : "expanded"
     const exportAll = inputs.exportAll
 
-    SceneNavigation._onLoadProgress(game.i18n.localize("mtte.exporting"), 0);
+    const progressbar = (new game.moulinette.applications.MoulinetteProgress(game.i18n.localize("mtte.exporting")))
+    progressbar.render(true)
+
     // 1 scene only
     if(this.scene) {
       if(!inputs.sceneName || inputs.sceneName.length == 0) {
@@ -155,11 +153,11 @@ export class MoulinetteLocalExport extends FormApplication {
       let scenes = MoulinetteLocalExport.getScenesFromFolder(this.folder)
       let idx = 0
       for(const sc of scenes) {
+        progressbar.setProgress(Math.round((idx / scenes.length)*100), sc.name);
         await MoulinetteLocalExport.exportScene(sc, sc.name, type, exportAll)
         idx++
-        SceneNavigation._onLoadProgress(game.i18n.localize("mtte.exporting"), Math.round((idx / scenes.length)*100));
       }
     }
-    SceneNavigation._onLoadProgress(game.i18n.localize("mtte.exporting"), 100);
+    progressbar.setProgress(100);
   }
 }
