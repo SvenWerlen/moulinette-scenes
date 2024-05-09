@@ -1,4 +1,4 @@
-# Moulinette Forge Scenes (Foundry VTT)
+# Moulinette Scenes (Foundry VTT)
 
 [![GitHub tags (latest by date)](https://img.shields.io/github/v/tag/SvenWerlen/moulinette-scenes)](https://github.com/SvenWerlen/moulinette-scenes/releases)
 [![License](https://img.shields.io/github/license/SvenWerlen/moulinette-scenes)](https://github.com/SvenWerlen/moulinette-scenes/LICENSE.txt)
@@ -8,13 +8,13 @@
 
 This is a submodule for [Moulinette Core](https://github.com/SvenWerlen/moulinette-core). See [Moulinette Core](https://github.com/SvenWerlen/moulinette-core) for an overview of all modules.
 
-## Browse and forge scenes
+## Browse and install scenes
 
-You're a GM (game master) preparing a new scenario? Moulinette Forge lets you browse a catalog of scenes shared by the community. 
+You're a GM (game master) preparing a new scenario? Moulinette Scenes lets you browse a catalog of scenes shared by the community. 
 * Search in the catalog
 * Have a look at the preview
 * Check the scenes you want to import
-* Forge!
+* Install!
 
 ![Catalog](https://github.com/SvenWerlen/moulinette-scenes/raw/main/docs/img/download-scene.jpg)
 
@@ -24,7 +24,7 @@ You're a GM (game master) preparing a new scenario? Moulinette Forge lets you br
 
 To **install** the module from FoundryVTT:
 1. Start FVTT and browse to the Game Modules tab in the Configuration and Setup menu
-2. Search for "Moulinette Forge" and click install on the desired module
+2. Search for "Moulinette" and click install on the desired module
 
 To **manually install** the module (not recommended), follow these instructions:
 
