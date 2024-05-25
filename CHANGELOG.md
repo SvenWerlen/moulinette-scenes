@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [12.1.0] - 2024-04-28
+## [12.1.1] - 2024-04-28
 ### Fixed
 - Journal article not created for new scenes (due to path being /background/src rather than /img)
+- Exception raised during Scene import (on v12)
 ### Added
 - Support for generating articles from animated scenes
 

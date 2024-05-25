@@ -332,10 +332,20 @@ export class MoulinettePreview extends FormApplication {
 
         // generate folder structure
         if(useFolders) {
-          sceneData.folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "Scene")
+          const folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "Scene")
+          if(folder) {
+            sceneData.folder = folder._id
+          }
         }
 
-        let newScene = await Scene.create(sceneData);
+        let newScene
+        if(game.version.startsWith("12.")) {
+          const doc = await Scene.fromImport(sceneData)
+          newScene = await Scene.create(doc)
+        } else {
+          newScene = await Scene.create(sceneData);
+        }
+
         let tData = await newScene.createThumbnail({img: newScene["background.src"] ?? newScene.background.src});
         // reset width/height
         let tUpdate = {thumb: tData.thumb}
