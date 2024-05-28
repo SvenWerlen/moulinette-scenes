@@ -340,6 +340,7 @@ export class MoulinettePreview extends FormApplication {
 
         let newScene
         if(game.version.startsWith("12.")) {
+          delete sceneData._stats // causes sometimes incompatibilites
           const doc = await Scene.fromImport(sceneData)
           newScene = await Scene.create(doc)
         } else {
