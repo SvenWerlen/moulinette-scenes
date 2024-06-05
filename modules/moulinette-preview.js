@@ -324,7 +324,7 @@ export class MoulinettePreview extends FormApplication {
         }
 
         const sceneData = this.asset.data.journalId ?
-            JSON.parse(JSON.stringify(game.packs.get(this.asset.filename).get(this.asset.data.journalId).data)) :
+            JSON.parse(JSON.stringify(game.packs.get(this.asset.filename).get(this.asset.data.journalId))) :
             JSON.parse(jsonAsText);
 
         // configure dimensions if no width/height set
