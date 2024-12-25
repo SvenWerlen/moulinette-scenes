@@ -117,13 +117,14 @@ export class MoulinettePreview extends FormApplication {
     } else {
       const assetURL = this.pack.path ? `${this.pack.path}/${this.asset.data.img}` : this.asset.data.img
       this.assetURL = assetURL.startsWith("http") ? assetURL : baseURL + assetURL
-
     }
     
     let previewImage = await this.hasOriginalThumb() ? `${this.asset.baseURL}_thumb_orig.webp${this.asset.sas}` : `${this.asset.baseURL}.webp${this.asset.sas}`
     // special case for ScenePacker
     if(scenePacker) {
       previewImage = this.assetURL
+    } else if(this.pack.isRemote) {
+      previewImage = `${this.assetURL}?${this.pack.sas}`
     }
     return { asset: this.asset, previewImage: previewImage, pack: this.pack, assetURL: this.assetURL, filename: filename, isScenePacker: scenePacker }
   }
