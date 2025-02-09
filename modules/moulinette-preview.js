@@ -51,7 +51,7 @@ export class MoulinettePreview extends FormApplication {
                   backgroundURL = sc["img"]
                 }
                 if(backgroundURL && backgroundURL.length > 0) {
-                  const key = `data/assets/${backgroundURL}`
+                  const key = `data/assets/${decodeURIComponent(backgroundURL)}`
                   if(key in packInfo.data) {
                     return packInfo.data[key]
                   }
@@ -126,6 +126,7 @@ export class MoulinettePreview extends FormApplication {
     } else if(this.pack.isRemote) {
       previewImage = `${this.assetURL}?${this.pack.sas}`
     }
+    //return { asset: this.asset, previewImage: previewImage.replace(/#/g, "%23"), pack: this.pack, assetURL: this.assetURL, filename: filename, isScenePacker: scenePacker }
     return { asset: this.asset, previewImage: previewImage, pack: this.pack, assetURL: this.assetURL, filename: filename, isScenePacker: scenePacker }
   }
 
