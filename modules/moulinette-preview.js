@@ -332,19 +332,13 @@ export class MoulinettePreview extends FormApplication {
         // configure dimensions if no width/height set
         let needsDims = !("width" in sceneData)
 
-        // generate folder structure
-        if(useFolders) {
-          const folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "Scene")
-          if(folder) {
-            sceneData.folder = folder._id
-          }
-        }
-
         let newScene
         if(game.version.startsWith("12.")) {
-          delete sceneData._stats // causes sometimes incompatibilites
-          const doc = await Scene.fromImport(sceneData)
-          newScene = await Scene.create(doc)
+          //delete sceneData._stats // causes sometimes incompatibilites
+          //const doc = await Scene.fromImport(sceneData)
+          //newScene = await Scene.create(doc)
+          const sc = await Scene.create({name: "Imported Scene"})
+          newScene = await sc?.importFromJSON(JSON.stringify(sceneData))
         } else {
           newScene = await Scene.create(sceneData);
         }
@@ -356,6 +350,16 @@ export class MoulinettePreview extends FormApplication {
           tUpdate.width = tData.width;
           tUpdate.height = tData.height;
         }  
+
+        // generate folder structure
+        tUpdate.folder = null
+        if(useFolders) {
+          const folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(this.pack.publisher, this.pack.name, "Scene")
+          if(folder) {
+            tUpdate.folder = folder._id
+          }
+        }
+        
         await newScene.update(tUpdate); // force generating the thumbnail and width/height (if needsDims)
 
         ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
